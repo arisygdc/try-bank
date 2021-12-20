@@ -2,13 +2,15 @@ package server
 
 import (
 	"try-bank/config"
+	"try-bank/controller"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	env    config.Environment
-	engine *gin.Engine
+	env        config.Environment
+	engine     *gin.Engine
+	controller controller.Controller
 }
 
 func NewServer(env config.Environment) *Server {

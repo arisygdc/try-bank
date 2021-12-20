@@ -1,14 +1,16 @@
 package controller
 
-import "try-bank/config"
+import (
+	"try-bank/database/postgres"
+)
 
 type Controller struct {
-	env config.Environment
+	DBSource *postgres.DB
 }
 
-func NewController(env config.Environment) (controller Controller) {
+func NewController(dbsource *postgres.DB) (controller Controller) {
 	controller = Controller{
-		env: env,
+		DBSource: dbsource,
 	}
 	return
 }

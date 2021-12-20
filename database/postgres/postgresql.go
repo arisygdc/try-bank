@@ -6,12 +6,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DBSource struct {
+type DB struct {
 	Conn    *sql.DB
 	Queries *Queries
 }
 
-func NewPostgres(dbdriver, dbsource string) (database *DBSource, err error) {
+func NewPostgres(dbdriver, dbsource string) (database *DB, err error) {
 	sqlconn, err := sql.Open(dbdriver, dbsource)
 	if err != nil {
 		return
