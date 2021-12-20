@@ -13,6 +13,7 @@ type Server struct {
 
 func NewServer(env config.Environment) *Server {
 	engine := gin.Default()
+	gin.SetMode(env.Environment)
 	server := &Server{
 		env:    env,
 		engine: engine,

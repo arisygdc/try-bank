@@ -6,8 +6,12 @@ import (
 	"try-bank/server"
 )
 
+const (
+	envPath = "."
+)
+
 func main() {
-	env, err := config.NewEnv(".")
+	env, err := config.NewEnv(envPath)
 	if err != nil {
 		log.Println(err)
 	}
