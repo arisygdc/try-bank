@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"try-bank/api"
 	"try-bank/config"
+	"try-bank/server"
 )
 
 func main() {
@@ -11,7 +11,9 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	server := api.NewServer(env)
-	routes := server.RouteGroup("")
-	routes.GET("/")
+	server := server.NewServer(env)
+	server.WebRouteCustomConfig()
+	server.WebRoute()
+	server.ApiRoute()
+	server.Run()
 }
