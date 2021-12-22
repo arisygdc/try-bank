@@ -52,7 +52,8 @@ CREATE TABLE accounts (
 CREATE TABLE companies (
     id UUID PRIMARY KEY NOT NULL,
     name VARCHAR(255) NOT NULL,
-    company_key VARCHAR(128) NOT NULL
+    company_key VARCHAR(128) NOT NULL,
+    domain VARCHAR(150) NOT NULL
 );
 
 CREATE TABLE companies_wallet (
@@ -62,7 +63,7 @@ CREATE TABLE companies_wallet (
 );  
 
 CREATE TABLE account_have_company (
-    account UUID NOT NULL,
+    account UUID PRIMARY KEY NOT NULL,
     company UUID NOT NULL UNIQUE,
     company_wallet UUID NOT NULL UNIQUE,
 

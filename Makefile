@@ -17,9 +17,9 @@ createmigrate:
 	migrate create -ext sql -dir database/migration -seq init_schema
 
 migrateup:
-	migrate -path database/migration/ -database "postgresql://postgres:secret@localhost:5432/bank?sslmode=disable" -verbose up
+	migrate -path database/postgres/migration/ -database "postgresql://postgres:secret@localhost:5432/bank?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path database/migration/ -database "postgresql://postgres:secret@localhost:5432/bank?sslmode=disable" -verbose down
+	migrate -path database/postgres/migration/ -database "postgresql://postgres:secret@localhost:5432/bank?sslmode=disable" -verbose down
   
 .PHONY: installpg uninstallpg startpg stoppg execdb createmigrate migrateup migratedown
