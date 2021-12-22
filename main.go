@@ -22,12 +22,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	ctr := controller.NewController(db)
 
-	controller.NewController(db)
-
-	server := server.NewServer(env)
-	server.WebRouteCustomConfig()
-	server.WebRoute()
+	server := server.NewServer(env, ctr)
 	server.ApiRoute()
 	server.Run()
 }
