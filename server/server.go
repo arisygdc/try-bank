@@ -13,12 +13,13 @@ type Server struct {
 	controller controller.Controller
 }
 
-func NewServer(env config.Environment) *Server {
+func NewServer(env config.Environment, ctr controller.Controller) *Server {
 	engine := gin.Default()
 	gin.SetMode(env.Environment)
 	server := &Server{
-		env:    env,
-		engine: engine,
+		env:        env,
+		engine:     engine,
+		controller: ctr,
 	}
 
 	return server

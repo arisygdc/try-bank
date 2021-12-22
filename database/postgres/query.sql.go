@@ -106,20 +106,6 @@ func (q *Queries) CreateCoustomerWallet(ctx context.Context, arg CreateCoustomer
 	return err
 }
 
-const createPermissionLevel = `-- name: CreatePermissionLevel :exec
-INSERT INTO permission_level (id, name) VALUES ($1, $2)
-`
-
-type CreatePermissionLevelParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-}
-
-func (q *Queries) CreatePermissionLevel(ctx context.Context, arg CreatePermissionLevelParams) error {
-	_, err := q.db.ExecContext(ctx, createPermissionLevel, arg.ID, arg.Name)
-	return err
-}
-
 const createTransfer = `-- name: CreateTransfer :exec
 INSERT INTO transfers (id, from_account, to_account, balance, transfer_at) VALUES ($1, $2, $3, $3, DEFAULT)
 `

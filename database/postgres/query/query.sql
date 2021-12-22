@@ -1,6 +1,3 @@
--- name: CreatePermissionLevel :exec
-INSERT INTO permission_level (id, name) VALUES ($1, $2);
-
 -- name: CreateUser :exec
 INSERT INTO users (id, firstname, lastname, created_at, email, birth, phone) VALUES ($1, $2, $3, DEFAULT, $4, $5, $6);
 
