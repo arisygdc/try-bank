@@ -74,25 +74,25 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 			return err
 		}
 
-		wallet := CreateCoustomerWalletParams{
+		wallet := CreateWalletParams{
 			ID:      uuid.New(),
 			Balance: req.TopUp,
 		}
-		if err := query.CreateCoustomerWallet(ctx, wallet); err != nil {
+		if err := query.CreateWallet(ctx, wallet); err != nil {
 			return err
 		}
 
-		permID, err := query.GetPermissionID(ctx, permission)
+		permID, err := query.GetLevelID(ctx, permission)
 		if err != nil {
 			return err
 		}
 
 		err = query.CreateAccount(ctx, CreateAccountParams{
-			ID:         uuid.New(),
-			Users:      user.ID,
-			AuthInfo:   authInfo.ID,
-			Wallet:     wallet.ID,
-			Permission: permID,
+			ID:       uuid.New(),
+			Users:    user.ID,
+			AuthInfo: authInfo.ID,
+			Wallet:   wallet.ID,
+			Level:    permID,
 		})
 		if err != nil {
 			return err
