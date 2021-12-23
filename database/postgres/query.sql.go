@@ -5,21 +5,22 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 const createAccount = `-- name: CreateAccount :exec
-INSERT INTO accounts (id, users, auth_info, wallet, permission) VALUES ($1, $2, $3, $4, $5)
+INSERT INTO accounts (id, users, auth_info, wallet, level) VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateAccountParams struct {
-	ID         uuid.UUID `json:"id"`
-	Users      uuid.UUID `json:"users"`
-	AuthInfo   uuid.UUID `json:"auth_info"`
-	Wallet     uuid.UUID `json:"wallet"`
-	Permission uuid.UUID `json:"permission"`
+	ID       uuid.UUID `json:"id"`
+	Users    uuid.UUID `json:"users"`
+	AuthInfo uuid.UUID `json:"auth_info"`
+	Wallet   uuid.UUID `json:"wallet"`
+	Level    uuid.UUID `json:"level"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) error {
@@ -28,23 +29,8 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) er
 		arg.Users,
 		arg.AuthInfo,
 		arg.Wallet,
-		arg.Permission,
+		arg.Level,
 	)
-	return err
-}
-
-const createAccountHaveCompany = `-- name: CreateAccountHaveCompany :exec
-INSERT INTO account_have_company (account, company, company_wallet) VALUES ($1, $2, $3)
-`
-
-type CreateAccountHaveCompanyParams struct {
-	Account       uuid.UUID `json:"account"`
-	Company       uuid.UUID `json:"company"`
-	CompanyWallet uuid.UUID `json:"company_wallet"`
-}
-
-func (q *Queries) CreateAccountHaveCompany(ctx context.Context, arg CreateAccountHaveCompanyParams) error {
-	_, err := q.db.ExecContext(ctx, createAccountHaveCompany, arg.Account, arg.Company, arg.CompanyWallet)
 	return err
 }
 
@@ -64,60 +50,55 @@ func (q *Queries) CreateAuthInfo(ctx context.Context, arg CreateAuthInfoParams) 
 }
 
 const createCompany = `-- name: CreateCompany :exec
-INSERT INTO companies (id, name, company_key) VALUES ($1, $2, $3)
+INSERT INTO companies (id, name, email, created_at) VALUES ($1, $2, $3, DEFAULT)
 `
 
 type CreateCompanyParams struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	CompanyKey string    `json:"company_key"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
 }
 
 func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) error {
-	_, err := q.db.ExecContext(ctx, createCompany, arg.ID, arg.Name, arg.CompanyKey)
+	_, err := q.db.ExecContext(ctx, createCompany, arg.ID, arg.Name, arg.Email)
 	return err
 }
 
-const createCompanyWallet = `-- name: CreateCompanyWallet :exec
-INSERT INTO companies_wallet (id, balance) VALUES ($1, $2)
+const createCompanyAccount = `-- name: CreateCompanyAccount :exec
+INSERT INTO companies_account (id, company, auth_info, wallet, virtual_account) VALUES ($1, $2, $3, $4, $5)
 `
 
-type CreateCompanyWalletParams struct {
-	ID      uuid.UUID `json:"id"`
-	Balance float64   `json:"balance"`
+type CreateCompanyAccountParams struct {
+	ID             uuid.UUID     `json:"id"`
+	Company        uuid.UUID     `json:"company"`
+	AuthInfo       uuid.UUID     `json:"auth_info"`
+	Wallet         uuid.UUID     `json:"wallet"`
+	VirtualAccount uuid.NullUUID `json:"virtual_account"`
 }
 
-func (q *Queries) CreateCompanyWallet(ctx context.Context, arg CreateCompanyWalletParams) error {
-	_, err := q.db.ExecContext(ctx, createCompanyWallet, arg.ID, arg.Balance)
-	return err
-}
-
-const createCoustomerWallet = `-- name: CreateCoustomerWallet :exec
-INSERT INTO coustomer_wallet (id, balance, last_update) VALUES ($1, $2, DEFAULT)
-`
-
-type CreateCoustomerWalletParams struct {
-	ID      uuid.UUID `json:"id"`
-	Balance float64   `json:"balance"`
-}
-
-func (q *Queries) CreateCoustomerWallet(ctx context.Context, arg CreateCoustomerWalletParams) error {
-	_, err := q.db.ExecContext(ctx, createCoustomerWallet, arg.ID, arg.Balance)
+func (q *Queries) CreateCompanyAccount(ctx context.Context, arg CreateCompanyAccountParams) error {
+	_, err := q.db.ExecContext(ctx, createCompanyAccount,
+		arg.ID,
+		arg.Company,
+		arg.AuthInfo,
+		arg.Wallet,
+		arg.VirtualAccount,
+	)
 	return err
 }
 
 const createTransfer = `-- name: CreateTransfer :exec
-INSERT INTO transfers (id, from_account, to_account, balance, transfer_at) VALUES ($1, $2, $3, $3, DEFAULT)
+INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES ($1, $2, $3, $3, DEFAULT)
 `
 
 type CreateTransferParams struct {
-	ID          uuid.UUID `json:"id"`
-	FromAccount uuid.UUID `json:"from_account"`
-	ToAccount   uuid.UUID `json:"to_account"`
+	ID         uuid.UUID `json:"id"`
+	FromWallet uuid.UUID `json:"from_wallet"`
+	ToWallet   uuid.UUID `json:"to_wallet"`
 }
 
 func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) error {
-	_, err := q.db.ExecContext(ctx, createTransfer, arg.ID, arg.FromAccount, arg.ToAccount)
+	_, err := q.db.ExecContext(ctx, createTransfer, arg.ID, arg.FromWallet, arg.ToWallet)
 	return err
 }
 
@@ -146,17 +127,52 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const createVAPayment = `-- name: CreateVAPayment :exec
+INSERT INTO va_payment (id, virtual_account, va_number, request_payment, paid_at) VALUES (NULL, $1, $2, $3, DEFAULT)
+`
+
+type CreateVAPaymentParams struct {
+	VirtualAccount uuid.UUID `json:"virtual_account"`
+	VaNumber       string    `json:"va_number"`
+	RequestPayment float64   `json:"request_payment"`
+}
+
+func (q *Queries) CreateVAPayment(ctx context.Context, arg CreateVAPaymentParams) error {
+	_, err := q.db.ExecContext(ctx, createVAPayment, arg.VirtualAccount, arg.VaNumber, arg.RequestPayment)
+	return err
+}
+
 const createVirtualAccount = `-- name: CreateVirtualAccount :exec
-INSERT INTO virtual_account (id, company_id, request_payment, va_number, paid_at) VALUES (NULL, $1, $2, $3, DEFAULT)
+INSERT INTO virtual_account (id, va_key, domain, va_identity, created_at) VALUES ($1, $2, $3, $4, DEFAULT)
 `
 
 type CreateVirtualAccountParams struct {
-	CompanyID      uuid.UUID `json:"company_id"`
-	RequestPayment float64   `json:"request_payment"`
-	VaNumber       string    `json:"va_number"`
+	ID         uuid.UUID      `json:"id"`
+	VaKey      sql.NullString `json:"va_key"`
+	Domain     sql.NullString `json:"domain"`
+	VaIdentity int64          `json:"va_identity"`
 }
 
 func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAccountParams) error {
-	_, err := q.db.ExecContext(ctx, createVirtualAccount, arg.CompanyID, arg.RequestPayment, arg.VaNumber)
+	_, err := q.db.ExecContext(ctx, createVirtualAccount,
+		arg.ID,
+		arg.VaKey,
+		arg.Domain,
+		arg.VaIdentity,
+	)
+	return err
+}
+
+const createWallet = `-- name: CreateWallet :exec
+INSERT INTO wallets (id, balance, last_update) VALUES ($1, $2, DEFAULT)
+`
+
+type CreateWalletParams struct {
+	ID      uuid.UUID `json:"id"`
+	Balance float64   `json:"balance"`
+}
+
+func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) error {
+	_, err := q.db.ExecContext(ctx, createWallet, arg.ID, arg.Balance)
 	return err
 }
