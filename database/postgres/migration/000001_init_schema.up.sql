@@ -14,12 +14,12 @@ CREATE TABLE auth_info (
     pin VARCHAR(150) NOT NULL
 );
 
-CREATE TABLE permission_level (
+CREATE TABLE levels (
     id UUID PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE coustomer_wallet (
+CREATE TABLE wallets (
     id UUID PRIMARY KEY NOT NULL,
     balance FLOAT NOT NULL DEFAULT 0,
     last_update TIMESTAMP NOT NULL DEFAULT NOW()
@@ -30,7 +30,7 @@ CREATE TABLE accounts (
     users UUID NOT NULL UNIQUE,
     auth_info UUID NOT NULL UNIQUE,
     wallet UUID NOT NULL UNIQUE,
-    permission UUID NOT NULL,
+    level UUID NOT NULL,
     
     CONSTRAINT users
         FOREIGN KEY (users)
@@ -40,66 +40,78 @@ CREATE TABLE accounts (
         FOREIGN KEY (auth_info)
         REFERENCES auth_info(id),
 
-    CONSTRAINT wallet
+    CONSTRAINT wallets
         FOREIGN KEY (wallet)
-        REFERENCES coustomer_wallet(id),
+        REFERENCES wallets(id),
 
-    CONSTRAINT permission_level
-        FOREIGN KEY (permission)
-        REFERENCES permission_level(id)
+    CONSTRAINT levels
+        FOREIGN KEY (level)
+        REFERENCES levels(id)
 );
 
 CREATE TABLE companies (
     id UUID PRIMARY KEY NOT NULL,
     name VARCHAR(255) NOT NULL,
-    company_key VARCHAR(128) NOT NULL,
-    domain VARCHAR(150) NOT NULL
+    email VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE companies_wallet (
+CREATE TABLE virtual_account (
     id UUID PRIMARY KEY NOT NULL,
-    balance FLOAT NOT NULL DEFAULT 0,
-    last_update TIMESTAMP NOT NULL DEFAULT NOW()
-);  
+    va_key  VARCHAR(150),
+    domain  VARCHAR(100),
+    va_identity BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
-CREATE TABLE account_have_company (
-    account UUID PRIMARY KEY NOT NULL,
+CREATE TABLE companies_account (
+    id UUID NOT NULL,
     company UUID NOT NULL UNIQUE,
-    company_wallet UUID NOT NULL UNIQUE,
-
-    CONSTRAINT accounts
-        FOREIGN KEY (account)
-        REFERENCES accounts(id),
+    auth_info UUID NOT NULL UNIQUE,
+    wallet UUID NOT NULL UNIQUE,
+    virtual_account UUID UNIQUE,
 
     CONSTRAINT companies
         FOREIGN KEY (company)
         REFERENCES companies(id),
     
-    CONSTRAINT companies_wallet
-        FOREIGN KEY(company_wallet)
-        REFERENCES companies_wallet(id)
+     CONSTRAINT wallets
+        FOREIGN KEY (wallet)
+        REFERENCES wallets(id),
+
+    CONSTRAINT auth_info
+        FOREIGN KEY (auth_info)
+        REFERENCES auth_info(id),
+    
+    CONSTRAINT virtual_account
+        FOREIGN KEY (virtual_account)
+        REFERENCES virtual_account(id)
 );
 
-CREATE TABLE virtual_account (
+CREATE TABLE va_payment (
     id UUID PRIMARY KEY NOT NULL,
-    company_id UUID NOT NULL,
+    virtual_account UUID NOT NULL,
+    va_number VARCHAR(200) NOT NULL,
     request_payment FLOAT NOT NULL,
-    va_number VARCHAR(15) NOT NULL,
-    paid_at TIMESTAMP NOT NULL DEFAULT NOW()
+    paid_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT virtual_account
+        FOREIGN KEY (virtual_account)
+        REFERENCES virtual_account(id)
 );
 
 CREATE TABLE transfers (
     id UUID PRIMARY KEY NOT NULL,
-    from_account UUID NOT NULL,
-    to_account UUID NOT NULL,
+    from_wallet UUID NOT NULL,
+    to_wallet UUID NOT NULL,
     balance FLOAT NOT NULL,
     transfer_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE transfers ADD FOREIGN KEY (from_account) REFERENCES accounts (id);
+ALTER TABLE transfers ADD FOREIGN KEY (from_wallet) REFERENCES wallets(id);
 
-ALTER TABLE transfers ADD FOREIGN KEY (to_account) REFERENCES accounts (id);
+ALTER TABLE transfers ADD FOREIGN KEY (to_wallet) REFERENCES wallets(id);
 
-CREATE INDEX ON transfers (from_account);
+CREATE INDEX ON transfers (from_wallet);
 
-CREATE INDEX ON transfers (to_account);
+CREATE INDEX ON transfers (to_wallet);
