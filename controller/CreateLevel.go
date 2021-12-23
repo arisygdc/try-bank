@@ -12,7 +12,7 @@ type PermissionReq struct {
 	Name string `from:"name" json:"name" binding:"required"`
 }
 
-func (c Controller) CreatePermission(ctx *gin.Context) {
+func (c Controller) CreateLevel(ctx *gin.Context) {
 	var req PermissionReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -21,7 +21,7 @@ func (c Controller) CreatePermission(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.Queries.CreatePermissionLevel(ctx, postgres.CreatePermissionLevelParams{
+	if err := c.DBSource.Queries.CreateLevel(ctx, postgres.CreateLevelParams{
 		ID:   uuid.New(),
 		Name: req.Name,
 	}); err != nil {
