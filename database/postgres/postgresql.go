@@ -151,7 +151,12 @@ func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) error {
 }
 
 func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
-	validateComp := ValidateCompanyParams{}
+	validateComp := ValidateCompanyParams{
+		Name:             req.Name,
+		Email:            req.Email,
+		Phone:            req.Phone,
+		RegisteredNumber: req.RegNum,
+	}
 	virtualAccount := CreateVirtualAccountParams{
 		ID:     uuid.New(),
 		VaKey:  util.RandString(32),
