@@ -61,7 +61,7 @@ CREATE TABLE virtual_account (
     id UUID PRIMARY KEY NOT NULL,
     va_key  VARCHAR(150) NOT NULL,
     domain  VARCHAR(100) NOT NULL,
-    va_identity BIGSERIAL NOT NULL,
+    va_identity SERIAL NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -92,7 +92,7 @@ CREATE TABLE companies_account (
 CREATE TABLE va_payment (
     id UUID PRIMARY KEY NOT NULL,
     virtual_account UUID NOT NULL,
-    va_number VARCHAR(200) NOT NULL,
+    va_number VARCHAR(13) NOT NULL,
     request_payment FLOAT NOT NULL,
     paid_at TIMESTAMP NOT NULL DEFAULT NOW(),
 

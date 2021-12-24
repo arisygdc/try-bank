@@ -73,7 +73,7 @@ type VirtualAccount struct {
 	ID         uuid.UUID `json:"id"`
 	VaKey      string    `json:"va_key"`
 	Domain     string    `json:"domain"`
-	VaIdentity int64     `json:"va_identity"`
+	VaIdentity int32     `json:"va_identity"`
 	CreatedAt  time.Time `json:"created_at"`
 }
 
