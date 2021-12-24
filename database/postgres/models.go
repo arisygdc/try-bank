@@ -3,7 +3,6 @@
 package postgres
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -71,11 +70,11 @@ type VaPayment struct {
 }
 
 type VirtualAccount struct {
-	ID         uuid.UUID      `json:"id"`
-	VaKey      sql.NullString `json:"va_key"`
-	Domain     sql.NullString `json:"domain"`
-	VaIdentity int64          `json:"va_identity"`
-	CreatedAt  time.Time      `json:"created_at"`
+	ID         uuid.UUID `json:"id"`
+	VaKey      string    `json:"va_key"`
+	Domain     string    `json:"domain"`
+	VaIdentity int64     `json:"va_identity"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type Wallet struct {

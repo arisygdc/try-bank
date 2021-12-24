@@ -59,8 +59,8 @@ CREATE TABLE companies (
 
 CREATE TABLE virtual_account (
     id UUID PRIMARY KEY NOT NULL,
-    va_key  VARCHAR(150),
-    domain  VARCHAR(100),
+    va_key  VARCHAR(150) NOT NULL,
+    domain  VARCHAR(100) NOT NULL,
     va_identity BIGSERIAL NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
