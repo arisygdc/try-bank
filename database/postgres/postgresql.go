@@ -109,6 +109,7 @@ func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) error {
 		ID:    uuid.New(),
 		Name:  req.Name,
 		Email: req.Email,
+		Phone: req.Phone,
 	}
 
 	wallet := CreateWalletParams{
