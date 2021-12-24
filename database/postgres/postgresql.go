@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"strings"
 	"time"
 	"try-bank/request"
@@ -182,6 +183,58 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 		}
 
 		if err := q.UpdateVAstatus(ctx, accountVA); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// Still using dummies balance
+func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
+	vaIdentity, err := strconv.Atoi(req.VirtualAccount[:len(req.VirtualAccount)-13])
+	if err != nil {
+		return err
+	}
+
+	checkRow, err := d.Queries.CheckVA(ctx, int32(vaIdentity))
+	if err != nil {
+		return err
+	}
+
+	VaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
+	// call api with value vaNumber
+	// return response{payment, vakey}
+	var response struct {
+		payment  float64
+		vaNumber string
+		vaKey    string
+	}
+	response.payment = 50000
+	response.vaNumber = VaNumber
+
+	// if response.vaKey != checkRow.VaKey {
+	// 	return errors.New("failer va key not match")
+	// }
+
+	// must change
+	balance := UpdateBalanceParams{
+		Balance: response.payment,
+		ID:      checkRow.WalletID.UUID,
+	}
+
+	pay := PayVAParams{
+		ID:             uuid.New(),
+		VirtualAccount: checkRow.VaID,
+		VaNumber:       response.vaNumber,
+		RequestPayment: response.payment,
+	}
+
+	return d.transaction(ctx, func(q *Queries) error {
+
+		if err := q.PayVA(ctx, pay); err != nil {
+			return err
+		}
+		if err := q.UpdateBalance(ctx, balance); err != nil {
 			return err
 		}
 		return nil
