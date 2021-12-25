@@ -1,3 +1,9 @@
+-- name: CreateLevel :exec
+INSERT INTO levels (id, name) VALUES ($1, $2);
+
+-- name: GetLevelID :one
+SELECT id FROM levels WHERE name = $1;
+
 -- name: CreateUser :exec
 INSERT INTO users (id, firstname, lastname, created_at, email, birth, phone) VALUES ($1, $2, $3, DEFAULT, $4, $5, $6);
 
@@ -16,4 +22,4 @@ INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES 
 -- name: GetUserWalletFromAuthInfo :one
 SELECT a.wallet FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
-WHERE ai.registered_number = $1; 
+WHERE ai.registered_number = $1;
