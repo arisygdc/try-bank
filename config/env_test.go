@@ -10,7 +10,7 @@ func TestEnv(t *testing.T) {
 	mp := make(map[string]string)
 	mp["0.0.0.0:8080"] = "server address"
 	mp["postgres"] = "database driver"
-	mp["postgresql://root:secret@127.0.0.1:5432/bank?sslmode=disable"] = "database source"
+	mp["postgresql://postgres:secret@127.0.0.1:5432/bank?sslmode=disable"] = "database source"
 	mp["debug"] = "environment"
 
 	assert := assert.New(t)
