@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c Controller) CreateLevel(ctx *gin.Context) {
-	var req request.PermissionReq
+func (c Controller) Transfer(ctx *gin.Context) {
+	var req request.Transfer
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -16,14 +16,14 @@ func (c Controller) CreateLevel(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.CreateLevel(ctx, req); err != nil {
+	if err := c.DBSource.Transfer(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "created",
+	ctx.JSON(http.StatusAccepted, gin.H{
+		"message": "transfered",
 	})
 }

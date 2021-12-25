@@ -1,5 +1,8 @@
 package request
 
+type PermissionReq struct {
+	Name string `from:"name" json:"name" binding:"required"`
+}
 type PostUser struct {
 	Firstname string  `from:"firstname" json:"firstname" binding:"required"`
 	Lastname  string  `from:"lastname" json:"lastname" binding:"required"`

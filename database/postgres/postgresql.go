@@ -20,7 +20,7 @@ import (
 
 type DB struct {
 	conn    *sql.DB
-	Queries *Queries
+	queries *Queries
 }
 
 type comsumeResponse struct {
@@ -42,7 +42,7 @@ func NewPostgres(dbdriver, dbsource string) (database *DB, err error) {
 
 	database = &DB{
 		conn:    sqlconn,
-		Queries: New(sqlconn),
+		queries: New(sqlconn),
 	}
 	return
 }
@@ -53,7 +53,7 @@ func (d DB) transaction(ctx context.Context, queryFunc func(*Queries) error) err
 		return err
 	}
 
-	queriesTx := d.Queries.WithTx(tx)
+	queriesTx := d.queries.WithTx(tx)
 	err = queryFunc(queriesTx)
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
@@ -63,6 +63,13 @@ func (d DB) transaction(ctx context.Context, queryFunc func(*Queries) error) err
 	}
 
 	return tx.Commit()
+}
+
+func (d DB) CreateLevel(ctx context.Context, req request.PermissionReq) error {
+	return d.queries.CreateLevel(ctx, CreateLevelParams{
+		ID:   uuid.New(),
+		Name: req.Name,
+	})
 }
 
 func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission string) error {
@@ -221,12 +228,12 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	checkRow, err := d.Queries.CheckVA(ctx, int32(vaIdentity))
+	checkRow, err := d.queries.CheckVA(ctx, int32(vaIdentity))
 	if err != nil {
 		return err
 	}
 
-	userWallet, err := d.Queries.GetUserWalletFromAuthInfo(ctx, req.RegNum)
+	userWallet, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.RegNum)
 	if err != nil {
 		return err
 	}
@@ -245,7 +252,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	userBalance, err := d.Queries.GetBalance(ctx, userWallet.UUID)
+	userBalance, err := d.queries.GetBalance(ctx, userWallet.UUID)
 	if err != nil {
 		return err
 	}
@@ -298,6 +305,45 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		}
 
 		if err := q.AddBalance(ctx, addCompanyBalance); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (d DB) Transfer(ctx context.Context, req request.Transfer) error {
+	from, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.FromRegNum)
+	if err != nil {
+		return err
+	}
+
+	to, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.ToRegNum)
+	if err != nil {
+		return err
+	}
+
+	balance, _ := d.queries.GetBalance(ctx, from.UUID)
+	if balance < req.TotalTransfer {
+		return errors.New("insufficient funds")
+	}
+
+	fromArg := SubtractBalanceParams{
+		Balance: req.TotalTransfer,
+		ID:      from.UUID,
+	}
+
+	toArg := AddBalanceParams{
+		Balance: req.TotalTransfer,
+		ID:      to.UUID,
+	}
+
+	return d.transaction(ctx, func(q *Queries) error {
+		if err := q.SubtractBalance(ctx, fromArg); err != nil {
+			return err
+		}
+
+		if err := q.AddBalance(ctx, toArg); err != nil {
 			return err
 		}
 
