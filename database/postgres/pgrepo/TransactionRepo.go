@@ -139,12 +139,22 @@ func (d DB) Transfer(ctx context.Context, req request.Transfer) error {
 		ID:      from.UUID,
 	}
 
+	transferArg := postgres.CreateTransferParams{
+		ID:         uuid.New(),
+		FromWallet: from.UUID,
+		ToWallet:   to.UUID,
+	}
+
 	toArg := postgres.AddBalanceParams{
 		Balance: req.TotalTransfer,
 		ID:      to.UUID,
 	}
 
 	return d.transaction(ctx, func(q *postgres.Queries) error {
+		if err := q.CreateTransfer(ctx, transferArg); err != nil {
+			return err
+		}
+
 		if err := q.SubtractBalance(ctx, fromArg); err != nil {
 			return err
 		}
