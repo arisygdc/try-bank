@@ -18,7 +18,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	db, err := database.NewSQL(env)
+	db, err := database.NewRepository(env)
 	if err != nil {
 		log.Fatalln(err)
 	}

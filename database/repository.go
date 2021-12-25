@@ -21,7 +21,7 @@ type IRepo interface {
 	Transfer(ctx context.Context, req request.Transfer) error
 }
 
-func NewSQL(env config.Environment) (dbsource IRepo, err error) {
+func NewRepository(env config.Environment) (dbsource IRepo, err error) {
 	if env.DBDriver == "postgres" {
 		dbsource, err = pgrepo.NewPostgres(env.DBDriver, env.DBSource)
 	} else {
