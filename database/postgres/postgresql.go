@@ -1,13 +1,10 @@
 package postgres
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -241,7 +238,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	vaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
 	bodyToJson["va_number"] = vaNumber
 
-	bodyBytes, err := ConsumeAPIPost(checkRow.FqdnDetailPayment, bodyType, bodyToJson)
+	bodyBytes, err := util.ConsumeAPIPost(checkRow.FqdnDetailPayment, bodyType, bodyToJson)
 	if err != nil {
 		return err
 	}
@@ -291,7 +288,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 			return err
 		}
 
-		respBody, err := ConsumeAPIPost(checkRow.FqdnPay, bodyType, map[string]string{"va_number": vaNumber})
+		respBody, err := util.ConsumeAPIPost(checkRow.FqdnPay, bodyType, map[string]string{"va_number": vaNumber})
 		if err != nil {
 			return err
 		}
@@ -349,18 +346,4 @@ func (d DB) Transfer(ctx context.Context, req request.Transfer) error {
 
 		return nil
 	})
-}
-
-func ConsumeAPIPost(targetConsume string, bodyType string, bodyTemplate map[string]string) (body []byte, err error) {
-	bodyJson, err := json.Marshal(bodyTemplate)
-	if err != nil {
-		return
-	}
-	resp, err := http.Post(targetConsume, bodyType, bytes.NewBuffer(bodyJson))
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-	body, _ = ioutil.ReadAll(resp.Body)
-	return
 }
