@@ -70,11 +70,12 @@ type VaPayment struct {
 }
 
 type VirtualAccount struct {
-	ID         uuid.UUID `json:"id"`
-	VaKey      string    `json:"va_key"`
-	Domain     string    `json:"domain"`
-	VaIdentity int32     `json:"va_identity"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID                uuid.UUID `json:"id"`
+	VaKey             string    `json:"va_key"`
+	FqdnDetailPayment string    `json:"fqdn_detail_payment"`
+	FqdnPay           string    `json:"fqdn_pay"`
+	VaIdentity        int32     `json:"va_identity"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 type Wallet struct {

@@ -1,5 +1,6 @@
 -- name: CheckVA :one
-SELECT ca.id as comp_id, va.id as va_id, ca.wallet as wallet_id, va.va_key, va.domain FROM virtual_account va
+SELECT ca.id as comp_id, va.id as va_id, ca.wallet as wallet_id, va.va_key, va.fqdn_detail_payment, fqdn_pay 
+FROM virtual_account va
 LEFT JOIN companies_account ca ON va.id = ca.virtual_account
 WHERE va_identity = $1;
 

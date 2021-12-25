@@ -24,17 +24,19 @@ func (q *Queries) AddBalance(ctx context.Context, arg AddBalanceParams) error {
 }
 
 const checkVA = `-- name: CheckVA :one
-SELECT ca.id as comp_id, va.id as va_id, ca.wallet as wallet_id, va.va_key, va.domain FROM virtual_account va
+SELECT ca.id as comp_id, va.id as va_id, ca.wallet as wallet_id, va.va_key, va.fqdn_detail_payment, fqdn_pay 
+FROM virtual_account va
 LEFT JOIN companies_account ca ON va.id = ca.virtual_account
 WHERE va_identity = $1
 `
 
 type CheckVARow struct {
-	CompID   uuid.NullUUID `json:"comp_id"`
-	VaID     uuid.UUID     `json:"va_id"`
-	WalletID uuid.NullUUID `json:"wallet_id"`
-	VaKey    string        `json:"va_key"`
-	Domain   string        `json:"domain"`
+	CompID            uuid.NullUUID `json:"comp_id"`
+	VaID              uuid.UUID     `json:"va_id"`
+	WalletID          uuid.NullUUID `json:"wallet_id"`
+	VaKey             string        `json:"va_key"`
+	FqdnDetailPayment string        `json:"fqdn_detail_payment"`
+	FqdnPay           string        `json:"fqdn_pay"`
 }
 
 func (q *Queries) CheckVA(ctx context.Context, vaIdentity int32) (CheckVARow, error) {
@@ -45,7 +47,8 @@ func (q *Queries) CheckVA(ctx context.Context, vaIdentity int32) (CheckVARow, er
 		&i.VaID,
 		&i.WalletID,
 		&i.VaKey,
-		&i.Domain,
+		&i.FqdnDetailPayment,
+		&i.FqdnPay,
 	)
 	return i, err
 }

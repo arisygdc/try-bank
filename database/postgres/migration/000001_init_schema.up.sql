@@ -60,7 +60,8 @@ CREATE TABLE companies (
 CREATE TABLE virtual_account (
     id UUID PRIMARY KEY NOT NULL,
     va_key  VARCHAR(150) NOT NULL,
-    domain  VARCHAR(100) NOT NULL,
+    fqdn_detail_payment  VARCHAR(100) NOT NULL,
+    fqdn_pay  VARCHAR(100) NOT NULL,
     va_identity SERIAL NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

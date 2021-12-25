@@ -5,7 +5,7 @@ INSERT INTO companies (id, name, email, phone, created_at) VALUES ($1, $2, $3, $
 INSERT INTO companies_account (id, company, auth_info, wallet, virtual_account) VALUES ($1, $2, $3, $4, $5);
 
 -- name: CreateVirtualAccount :exec
-INSERT INTO virtual_account (id, va_key, domain, created_at) VALUES ($1, $2, $3, DEFAULT);
+INSERT INTO virtual_account (id, va_key, fqdn_detail_payment, fqdn_pay, created_at) VALUES ($1, $2, $3, $4, DEFAULT);
 
 -- name: CreateVAPayment :exec
 INSERT INTO va_payment (id, virtual_account, va_number, request_payment, paid_at) VALUES (NULL, $1, $2, $3, DEFAULT);

@@ -179,9 +179,10 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 	}
 
 	virtualAccount := CreateVirtualAccountParams{
-		ID:     uuid.New(),
-		VaKey:  util.RandString(32),
-		Domain: req.Domain,
+		ID:                uuid.New(),
+		VaKey:             util.RandString(32),
+		FqdnDetailPayment: req.FQDNCheck,
+		FqdnPay:           req.FQDNPay,
 	}
 
 	accountVA := UpdateVAstatusParams{
@@ -209,12 +210,10 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 	})
 }
 
-// Still using dummies balance
 func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	var (
-		targetAPIConsume = "http://192.168.1.235/web-kwh//?api=check-bayar"
-		bodyType         = "application/json; charset=utf-8"
-		bodyToJson       = make(map[string]string)
+		bodyType   = "application/json; charset=utf-8"
+		bodyToJson = make(map[string]string)
 	)
 
 	vaIdentity, err := strconv.Atoi(req.VirtualAccount[:len(req.VirtualAccount)-13])
@@ -235,7 +234,13 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	vaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
 	bodyToJson["va_number"] = vaNumber
 
-	response, err := callTarget(targetAPIConsume, bodyType, bodyToJson)
+	bodyBytes, err := ConsumeAPIPost(checkRow.FqdnDetailPayment, bodyType, bodyToJson)
+	if err != nil {
+		return err
+	}
+
+	var response comsumeResponse
+	err = json.Unmarshal(bodyBytes, &response)
 	if err != nil {
 		return err
 	}
@@ -245,7 +250,11 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	if response.Data.Payment < userBalance {
+	if response.Data.Payment < 10000 {
+		return nil
+	}
+
+	if userBalance < response.Data.Payment {
 		return errors.New("insufficient funds")
 	}
 
@@ -275,6 +284,19 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 			return err
 		}
 
+		respBody, err := ConsumeAPIPost(checkRow.FqdnPay, bodyType, map[string]string{"va_number": vaNumber})
+		if err != nil {
+			return err
+		}
+
+		var response struct {
+			Message string `json:"message"`
+		}
+		err = json.Unmarshal(respBody, &response)
+		if err != nil {
+			return err
+		}
+
 		if err := q.AddBalance(ctx, addCompanyBalance); err != nil {
 			return err
 		}
@@ -283,7 +305,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	})
 }
 
-func callTarget(targetConsume string, bodyType string, bodyTemplate map[string]string) (response comsumeResponse, err error) {
+func ConsumeAPIPost(targetConsume string, bodyType string, bodyTemplate map[string]string) (body []byte, err error) {
 	bodyJson, err := json.Marshal(bodyTemplate)
 	if err != nil {
 		return
@@ -293,8 +315,6 @@ func callTarget(targetConsume string, bodyType string, bodyTemplate map[string]s
 		return
 	}
 	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	err = json.Unmarshal(bodyBytes, &response)
+	body, _ = ioutil.ReadAll(resp.Body)
 	return
 }

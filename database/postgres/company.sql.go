@@ -69,17 +69,23 @@ func (q *Queries) CreateVAPayment(ctx context.Context, arg CreateVAPaymentParams
 }
 
 const createVirtualAccount = `-- name: CreateVirtualAccount :exec
-INSERT INTO virtual_account (id, va_key, domain, created_at) VALUES ($1, $2, $3, DEFAULT)
+INSERT INTO virtual_account (id, va_key, fqdn_detail_payment, fqdn_pay, created_at) VALUES ($1, $2, $3, $4, DEFAULT)
 `
 
 type CreateVirtualAccountParams struct {
-	ID     uuid.UUID `json:"id"`
-	VaKey  string    `json:"va_key"`
-	Domain string    `json:"domain"`
+	ID                uuid.UUID `json:"id"`
+	VaKey             string    `json:"va_key"`
+	FqdnDetailPayment string    `json:"fqdn_detail_payment"`
+	FqdnPay           string    `json:"fqdn_pay"`
 }
 
 func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAccountParams) error {
-	_, err := q.db.ExecContext(ctx, createVirtualAccount, arg.ID, arg.VaKey, arg.Domain)
+	_, err := q.db.ExecContext(ctx, createVirtualAccount,
+		arg.ID,
+		arg.VaKey,
+		arg.FqdnDetailPayment,
+		arg.FqdnPay,
+	)
 	return err
 }
 
