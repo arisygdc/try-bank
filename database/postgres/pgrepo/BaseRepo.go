@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"try-bank/database/postgres"
+
+	_ "github.com/lib/pq"
 )
 
 type DB struct {
