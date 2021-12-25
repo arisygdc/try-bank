@@ -16,7 +16,7 @@ func (c Controller) PaymentVA(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.PaymentVA(ctx, req); err != nil {
+	if err := c.Repo.PaymentVA(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

@@ -16,7 +16,7 @@ func (c Controller) CreateLevel(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.CreateLevel(ctx, req); err != nil {
+	if err := c.Repo.CreateLevel(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

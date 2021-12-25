@@ -16,7 +16,7 @@ func (c Controller) ActivateVA(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.ActivateVA(ctx, req); err != nil {
+	if err := c.Repo.ActivateVA(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

@@ -16,7 +16,7 @@ func (c Controller) Transfer(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.Transfer(ctx, req); err != nil {
+	if err := c.Repo.Transfer(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

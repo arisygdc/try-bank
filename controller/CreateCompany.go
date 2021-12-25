@@ -16,7 +16,7 @@ func (c Controller) CreateCompany(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.CreateCompany(ctx, req); err != nil {
+	if err := c.Repo.CreateCompany(ctx, req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

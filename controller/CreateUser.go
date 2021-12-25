@@ -16,7 +16,7 @@ func (c Controller) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DBSource.CreateUser(ctx, req, "basic"); err != nil {
+	if err := c.Repo.CreateUser(ctx, req, "basic"); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"try-bank/database/postgres"
+	"try-bank/database"
 )
 
 type Controller struct {
-	DBSource *postgres.DB
+	Repo database.IRepo
 }
 
-func NewController(dbsource *postgres.DB) (controller Controller) {
+func NewController(repository database.IRepo) (controller Controller) {
 	controller = Controller{
-		DBSource: dbsource,
+		Repo: repository,
 	}
 	return
 }
