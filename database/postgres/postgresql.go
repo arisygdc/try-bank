@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -24,15 +23,14 @@ type DB struct {
 }
 
 type comsumeResponse struct {
-	Status  float64     `from:"status" json:"status"`
-	Data    consumeData `from:"data" json:"data"`
-	Message string      `from:"message" json:"message"`
+	Status  float64     `json:"status"`
+	Data    consumeData `json:"data"`
+	Message string      `json:"message"`
 }
 
 type consumeData struct {
-	Payment  float64 `from:"payment_request" json:"payment_request"`
-	VaNumber string  `from:"va_number" json:"va_number"`
-	VaKey    string  `from:"va_key" json:"va_key"`
+	Payment float64 `json:"request_payment"`
+	VaKey   int     `json:"va_key"`
 }
 
 func NewPostgres(dbdriver, dbsource string) (database *DB, err error) {
@@ -209,7 +207,7 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 // Still using dummies balance
 func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	var (
-		targetAPIConsume = "/api"
+		targetAPIConsume = "http://192.168.1.235/web-kwh//?api=check-bayar"
 		bodyType         = "application/json; charset=utf-8"
 		bodyToJson       = make(map[string]string)
 	)
@@ -224,18 +222,13 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	VaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
-	bodyToJson["va_number"] = VaNumber
-	// call api with value vaNumber
-	// return response{payment, vakey}
-	response, err := callTarget(checkRow.Domain+targetAPIConsume, bodyType, bodyToJson)
+	vaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
+	bodyToJson["va_number"] = vaNumber
+
+	response, err := callTarget(targetAPIConsume, bodyType, bodyToJson)
 	if err != nil {
 		return err
 	}
-	if response.Data.VaKey != checkRow.VaKey {
-		return errors.New("untrusted target")
-	}
-
 	balance := UpdateBalanceParams{
 		Balance: response.Data.Payment,
 		ID:      checkRow.WalletID.UUID,
@@ -244,7 +237,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	pay := PayVAParams{
 		ID:             uuid.New(),
 		VirtualAccount: checkRow.VaID,
-		VaNumber:       response.Data.VaNumber,
+		VaNumber:       vaNumber,
 		RequestPayment: response.Data.Payment,
 	}
 
@@ -272,6 +265,6 @@ func callTarget(targetConsume string, bodyType string, bodyTemplate map[string]s
 	defer resp.Body.Close()
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
 
-	json.Unmarshal(bodyBytes, &response)
+	err = json.Unmarshal(bodyBytes, &response)
 	return
 }
