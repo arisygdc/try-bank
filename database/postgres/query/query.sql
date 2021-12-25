@@ -12,3 +12,8 @@ INSERT INTO accounts (id, users, auth_info, wallet, level) VALUES ($1, $2, $3, $
 
 -- name: CreateTransfer :exec
 INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES ($1, $2, $3, $3, DEFAULT);
+
+-- name: GetUserWalletFromAuthInfo :one
+SELECT a.wallet FROM accounts a
+RIGHT JOIN auth_info ai ON ai.id = a.auth_info
+WHERE ai.registered_number = $1; 

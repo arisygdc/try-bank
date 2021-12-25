@@ -101,3 +101,16 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) erro
 	_, err := q.db.ExecContext(ctx, createWallet, arg.ID, arg.Balance)
 	return err
 }
+
+const getUserWalletFromAuthInfo = `-- name: GetUserWalletFromAuthInfo :one
+SELECT a.wallet FROM accounts a
+RIGHT JOIN auth_info ai ON ai.id = a.auth_info
+WHERE ai.registered_number = $1
+`
+
+func (q *Queries) GetUserWalletFromAuthInfo(ctx context.Context, registeredNumber int32) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, getUserWalletFromAuthInfo, registeredNumber)
+	var wallet uuid.NullUUID
+	err := row.Scan(&wallet)
+	return wallet, err
+}

@@ -9,6 +9,20 @@ import (
 	"github.com/google/uuid"
 )
 
+const addBalance = `-- name: AddBalance :exec
+UPDATE wallets SET balance = balance + $1 WHERE id = $2
+`
+
+type AddBalanceParams struct {
+	Balance float64   `json:"balance"`
+	ID      uuid.UUID `json:"id"`
+}
+
+func (q *Queries) AddBalance(ctx context.Context, arg AddBalanceParams) error {
+	_, err := q.db.ExecContext(ctx, addBalance, arg.Balance, arg.ID)
+	return err
+}
+
 const checkVA = `-- name: CheckVA :one
 SELECT ca.id as comp_id, va.id as va_id, ca.wallet as wallet_id, va.va_key, va.domain FROM virtual_account va
 LEFT JOIN companies_account ca ON va.id = ca.virtual_account
@@ -36,6 +50,17 @@ func (q *Queries) CheckVA(ctx context.Context, vaIdentity int32) (CheckVARow, er
 	return i, err
 }
 
+const getBalance = `-- name: GetBalance :one
+SELECT balance FROM wallets WHERE id = $1
+`
+
+func (q *Queries) GetBalance(ctx context.Context, id uuid.UUID) (float64, error) {
+	row := q.db.QueryRowContext(ctx, getBalance, id)
+	var balance float64
+	err := row.Scan(&balance)
+	return balance, err
+}
+
 const payVA = `-- name: PayVA :exec
 INSERT INTO va_payment (id, virtual_account, va_number, request_payment, paid_at) VALUES ($1, $2, $3, $4, DEFAULT)
 `
@@ -57,16 +82,16 @@ func (q *Queries) PayVA(ctx context.Context, arg PayVAParams) error {
 	return err
 }
 
-const updateBalance = `-- name: UpdateBalance :exec
-UPDATE wallets SET balance = balance + $1 WHERE id = $2
+const subtractBalance = `-- name: SubtractBalance :exec
+UPDATE wallets SET balance = balance - $1 WHERE id = $2
 `
 
-type UpdateBalanceParams struct {
+type SubtractBalanceParams struct {
 	Balance float64   `json:"balance"`
 	ID      uuid.UUID `json:"id"`
 }
 
-func (q *Queries) UpdateBalance(ctx context.Context, arg UpdateBalanceParams) error {
-	_, err := q.db.ExecContext(ctx, updateBalance, arg.Balance, arg.ID)
+func (q *Queries) SubtractBalance(ctx context.Context, arg SubtractBalanceParams) error {
+	_, err := q.db.ExecContext(ctx, subtractBalance, arg.Balance, arg.ID)
 	return err
 }

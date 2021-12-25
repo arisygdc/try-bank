@@ -6,5 +6,11 @@ WHERE va_identity = $1;
 -- name: PayVA :exec
 INSERT INTO va_payment (id, virtual_account, va_number, request_payment, paid_at) VALUES ($1, $2, $3, $4, DEFAULT);
 
--- name: UpdateBalance :exec
+-- name: AddBalance :exec
 UPDATE wallets SET balance = balance + $1 WHERE id = $2;
+
+-- name: SubtractBalance :exec
+UPDATE wallets SET balance = balance - $1 WHERE id = $2;
+
+-- name: GetBalance :one
+SELECT balance FROM wallets WHERE id = $1;

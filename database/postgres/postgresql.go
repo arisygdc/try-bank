@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -69,6 +70,7 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 	if err != nil {
 		return err
 	}
+
 	user := CreateUserParams{
 		ID:        uuid.New(),
 		Firstname: req.Firstname,
@@ -77,11 +79,13 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 		Birth:     t.UTC(),
 		Phone:     req.Phone,
 	}
+
 	authInfo := CreateAuthInfoParams{
 		ID:               uuid.New(),
 		RegisteredNumber: int32(t.Month()) + int32(req.Phone[9]+req.Phone[10]+req.Phone[11]),
 		Pin:              req.Pin,
 	}
+
 	wallet := CreateWalletParams{
 		ID:      uuid.New(),
 		Balance: req.TopUp,
@@ -173,6 +177,7 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 		Phone:            req.Phone,
 		RegisteredNumber: req.RegNum,
 	}
+
 	virtualAccount := CreateVirtualAccountParams{
 		ID:     uuid.New(),
 		VaKey:  util.RandString(32),
@@ -222,6 +227,11 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
+	userWallet, err := d.Queries.GetUserWalletFromAuthInfo(ctx, req.RegNum)
+	if err != nil {
+		return err
+	}
+
 	vaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
 	bodyToJson["va_number"] = vaNumber
 
@@ -229,9 +239,24 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	if err != nil {
 		return err
 	}
-	balance := UpdateBalanceParams{
+
+	userBalance, err := d.Queries.GetBalance(ctx, userWallet.UUID)
+	if err != nil {
+		return err
+	}
+
+	if response.Data.Payment < userBalance {
+		return errors.New("insufficient funds")
+	}
+
+	addCompanyBalance := AddBalanceParams{
 		Balance: response.Data.Payment,
 		ID:      checkRow.WalletID.UUID,
+	}
+
+	payerBalance := SubtractBalanceParams{
+		Balance: response.Data.Payment,
+		ID:      userWallet.UUID,
 	}
 
 	pay := PayVAParams{
@@ -242,13 +267,18 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	}
 
 	return d.transaction(ctx, func(q *Queries) error {
-
 		if err := q.PayVA(ctx, pay); err != nil {
 			return err
 		}
-		if err := q.UpdateBalance(ctx, balance); err != nil {
+
+		if err := q.SubtractBalance(ctx, payerBalance); err != nil {
 			return err
 		}
+
+		if err := q.AddBalance(ctx, addCompanyBalance); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
