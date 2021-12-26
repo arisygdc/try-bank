@@ -14,8 +14,8 @@ var (
 
 type IRepo interface {
 	CreateLevel(ctx context.Context, req request.PermissionReq) error
-	CreateUser(ctx context.Context, req request.PostUser, permission string) error
-	CreateCompany(ctx context.Context, req request.PostCompany) error
+	CreateUser(ctx context.Context, req request.PostUser, permission string) (int32, error)
+	CreateCompany(ctx context.Context, req request.PostCompany) (int32, error)
 	ActivateVA(ctx context.Context, req request.VirtualAccount) error
 	PaymentVA(ctx context.Context, req request.PaymentVA) error
 	Transfer(ctx context.Context, req request.Transfer) error

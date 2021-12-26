@@ -16,7 +16,8 @@ func (c Controller) CreateCompany(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.Repo.CreateCompany(ctx, req); err != nil {
+	regNum, err := c.Repo.CreateCompany(ctx, req)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -24,6 +25,7 @@ func (c Controller) CreateCompany(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "created",
+		"message":             "created",
+		"registration_number": regNum,
 	})
 }

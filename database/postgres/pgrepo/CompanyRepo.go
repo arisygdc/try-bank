@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) error {
+func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) (int32, error) {
 	company := postgres.CreateCompanyParams{
 		ID:    uuid.New(),
 		Name:  req.Name,
@@ -24,7 +24,7 @@ func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) error {
 
 	authInfo := postgres.CreateAuthInfoParams{
 		ID:               uuid.New(),
-		RegisteredNumber: int32(req.Phone[9] + req.Phone[10] + req.Phone[11]),
+		RegisteredNumber: int32(req.Phone[9]+req.Phone[10]+req.Phone[11]) + int32(util.RandNum(5)),
 		Pin:              req.Pin,
 	}
 
@@ -35,7 +35,7 @@ func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) error {
 		Wallet:   wallet.ID,
 	}
 
-	return d.transaction(ctx, func(q *postgres.Queries) error {
+	return authInfo.RegisteredNumber, d.transaction(ctx, func(q *postgres.Queries) error {
 		if err := q.CreateCompany(ctx, company); err != nil {
 			return err
 		}

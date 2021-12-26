@@ -6,6 +6,7 @@ import (
 	"time"
 	"try-bank/database/postgres"
 	"try-bank/request"
+	"try-bank/util"
 
 	"github.com/google/uuid"
 )
@@ -17,10 +18,10 @@ func (d DB) CreateLevel(ctx context.Context, req request.PermissionReq) error {
 	})
 }
 
-func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission string) error {
+func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission string) (int32, error) {
 	t, err := time.Parse("2006-1-2", strings.Trim(req.Birth, " "))
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	user := postgres.CreateUserParams{
@@ -34,7 +35,7 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 
 	authInfo := postgres.CreateAuthInfoParams{
 		ID:               uuid.New(),
-		RegisteredNumber: int32(t.Month()) + int32(req.Phone[9]+req.Phone[10]+req.Phone[11]),
+		RegisteredNumber: int32(t.Month()) + int32(req.Phone[9]+req.Phone[10]+req.Phone[11]) + int32(util.RandNum(5)),
 		Pin:              req.Pin,
 	}
 
@@ -43,7 +44,7 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 		Balance: req.TopUp,
 	}
 
-	return d.transaction(ctx, func(query *postgres.Queries) error {
+	return authInfo.RegisteredNumber, d.transaction(ctx, func(query *postgres.Queries) error {
 		if err := query.CreateUser(ctx, user); err != nil {
 			return err
 		}
