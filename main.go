@@ -18,11 +18,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	db, err := database.NewRepository(env)
+	repo, err := database.NewRepository(env)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ctr := controller.NewController(db)
+	ctr := controller.NewController(repo)
 
 	server := server.NewServer(env, ctr)
 	server.ApiRoute()
