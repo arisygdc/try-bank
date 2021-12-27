@@ -89,6 +89,17 @@ func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAcc
 	return err
 }
 
+const getVAIdentity = `-- name: GetVAIdentity :one
+SELECT va_identity FROM virtual_account WHERE id = $1
+`
+
+func (q *Queries) GetVAIdentity(ctx context.Context, id uuid.UUID) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getVAIdentity, id)
+	var va_identity int32
+	err := row.Scan(&va_identity)
+	return va_identity, err
+}
+
 const updateVAstatus = `-- name: UpdateVAstatus :exec
 UPDATE companies_account SET virtual_account = $1 WHERE id = $2
 `

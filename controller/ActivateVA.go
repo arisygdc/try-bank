@@ -16,7 +16,8 @@ func (c Controller) ActivateVA(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.Repo.ActivateVA(ctx, req); err != nil {
+	vaIdentity, vaKey, err := c.Repo.ActivateVA(ctx, req)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -24,6 +25,8 @@ func (c Controller) ActivateVA(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "created",
+		"message":   "created",
+		"va_number": vaIdentity,
+		"va_key":    vaKey,
 	})
 }

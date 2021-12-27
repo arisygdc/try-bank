@@ -55,7 +55,8 @@ func (d DB) CreateCompany(ctx context.Context, req request.PostCompany) (int32, 
 	})
 }
 
-func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
+// Return virtual account identity, va key, error
+func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) (int32, string, error) {
 	validateComp := postgres.ValidateCompanyParams{
 		Name:             req.Name,
 		Email:            req.Email,
@@ -77,7 +78,7 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 		},
 	}
 
-	return d.transaction(ctx, func(q *postgres.Queries) error {
+	if err := d.transaction(ctx, func(q *postgres.Queries) error {
 		vaID, err := q.ValidateCompany(ctx, validateComp)
 		if err != nil {
 			return err
@@ -92,5 +93,10 @@ func (d DB) ActivateVA(ctx context.Context, req request.VirtualAccount) error {
 			return err
 		}
 		return nil
-	})
+	}); err != nil {
+		return 0, "", err
+	}
+
+	vaIdentity, err := d.queries.GetVAIdentity(ctx, virtualAccount.ID)
+	return vaIdentity, virtualAccount.VaKey, err
 }
