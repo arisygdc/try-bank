@@ -12,6 +12,11 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrInsufFund = errors.New("insufficient funds")
+	ErrAuth      = errors.New("authentication fail")
+)
+
 type comsumeResponse struct {
 	Status  float64     `json:"status"`
 	Data    consumeData `json:"data"`
@@ -39,9 +44,13 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	userWallet, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.RegNum)
+	userFrom, err := d.queries.GetUserWalletAndAuth(ctx, req.RegNum)
 	if err != nil {
 		return err
+	}
+
+	if !validatePin(userFrom.Pin, req.Pin) {
+		return ErrAuth
 	}
 
 	vaNumber := req.VirtualAccount[len(req.VirtualAccount)-13:]
@@ -58,7 +67,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 		return err
 	}
 
-	userBalance, err := d.queries.GetBalance(ctx, userWallet.UUID)
+	userBalance, err := d.queries.GetBalance(ctx, userFrom.Wallet.UUID)
 	if err != nil {
 		return err
 	}
@@ -68,7 +77,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 	}
 
 	if userBalance < response.Data.Payment {
-		return errors.New("insufficient funds")
+		return ErrInsufFund
 	}
 
 	addCompanyBalance := postgres.AddBalanceParams{
@@ -78,7 +87,7 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 
 	payerBalance := postgres.SubtractBalanceParams{
 		Balance: response.Data.Payment,
-		ID:      userWallet.UUID,
+		ID:      userFrom.Wallet.UUID,
 	}
 
 	pay := postgres.PayVAParams{
@@ -119,29 +128,34 @@ func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
 }
 
 func (d DB) Transfer(ctx context.Context, req request.Transfer) error {
-	from, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.FromRegNum)
+	from, err := d.queries.GetUserWalletAndAuth(ctx, req.FromRegNum)
 	if err != nil {
 		return err
 	}
 
-	to, err := d.queries.GetUserWalletFromAuthInfo(ctx, req.ToRegNum)
+	if !validatePin(from.Pin, req.Pin) {
+		return ErrAuth
+	}
+
+	to, err := d.queries.GetUserWallet(ctx, req.ToRegNum)
 	if err != nil {
 		return err
 	}
 
-	balance, _ := d.queries.GetBalance(ctx, from.UUID)
+	balance, _ := d.queries.GetBalance(ctx, from.Wallet.UUID)
 	if balance < req.TotalTransfer {
-		return errors.New("insufficient funds")
+		return ErrInsufFund
 	}
 
 	fromArg := postgres.SubtractBalanceParams{
 		Balance: req.TotalTransfer,
-		ID:      from.UUID,
+		ID:      from.Wallet.UUID,
 	}
 
 	transferArg := postgres.CreateTransferParams{
 		ID:         uuid.New(),
-		FromWallet: from.UUID,
+		FromWallet: from.Wallet.UUID,
+		Balance:    req.TotalTransfer,
 		ToWallet:   to.UUID,
 	}
 
@@ -165,4 +179,8 @@ func (d DB) Transfer(ctx context.Context, req request.Transfer) error {
 
 		return nil
 	})
+}
+
+func validatePin(pin string, reqPin string) bool {
+	return pin == reqPin
 }

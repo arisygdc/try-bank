@@ -63,17 +63,23 @@ func (q *Queries) CreateLevel(ctx context.Context, arg CreateLevelParams) error 
 }
 
 const createTransfer = `-- name: CreateTransfer :exec
-INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES ($1, $2, $3, $3, DEFAULT)
+INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES ($1, $2, $3, $4, DEFAULT)
 `
 
 type CreateTransferParams struct {
 	ID         uuid.UUID `json:"id"`
 	FromWallet uuid.UUID `json:"from_wallet"`
 	ToWallet   uuid.UUID `json:"to_wallet"`
+	Balance    float64   `json:"balance"`
 }
 
 func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) error {
-	_, err := q.db.ExecContext(ctx, createTransfer, arg.ID, arg.FromWallet, arg.ToWallet)
+	_, err := q.db.ExecContext(ctx, createTransfer,
+		arg.ID,
+		arg.FromWallet,
+		arg.ToWallet,
+		arg.Balance,
+	)
 	return err
 }
 
@@ -127,15 +133,33 @@ func (q *Queries) GetLevelID(ctx context.Context, name string) (uuid.UUID, error
 	return id, err
 }
 
-const getUserWalletFromAuthInfo = `-- name: GetUserWalletFromAuthInfo :one
+const getUserWallet = `-- name: GetUserWallet :one
 SELECT a.wallet FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
 WHERE ai.registered_number = $1
 `
 
-func (q *Queries) GetUserWalletFromAuthInfo(ctx context.Context, registeredNumber int32) (uuid.NullUUID, error) {
-	row := q.db.QueryRowContext(ctx, getUserWalletFromAuthInfo, registeredNumber)
+func (q *Queries) GetUserWallet(ctx context.Context, registeredNumber int32) (uuid.NullUUID, error) {
+	row := q.db.QueryRowContext(ctx, getUserWallet, registeredNumber)
 	var wallet uuid.NullUUID
 	err := row.Scan(&wallet)
 	return wallet, err
+}
+
+const getUserWalletAndAuth = `-- name: GetUserWalletAndAuth :one
+SELECT a.wallet, ai.pin FROM accounts a
+RIGHT JOIN auth_info ai ON ai.id = a.auth_info
+WHERE ai.registered_number = $1
+`
+
+type GetUserWalletAndAuthRow struct {
+	Wallet uuid.NullUUID `json:"wallet"`
+	Pin    string        `json:"pin"`
+}
+
+func (q *Queries) GetUserWalletAndAuth(ctx context.Context, registeredNumber int32) (GetUserWalletAndAuthRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserWalletAndAuth, registeredNumber)
+	var i GetUserWalletAndAuthRow
+	err := row.Scan(&i.Wallet, &i.Pin)
+	return i, err
 }

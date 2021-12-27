@@ -19,3 +19,6 @@ RIGHT JOIN companies c ON ca.company = c.id
 RIGHT JOIN auth_info ai ON ca.auth_info = ai.id
 WHERE c.name = $1 AND c.email = $2 AND c.phone = $3
 AND ai.registered_number = $4;
+
+-- name: GetVAIdentity :one
+SELECT va_identity FROM virtual_account WHERE id = $1;
