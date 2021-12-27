@@ -7,5 +7,5 @@ func (s *Server) ApiRoute() {
 	r.POST("/company", s.controller.CreateCompany)
 	r.PUT("/company/va", s.controller.ActivateVA)
 	r.POST("/payment/va", s.controller.PaymentVA)
-	r.PATCH("/transfer", s.controller.Transfer)
+	r.POST("/transfer", s.controller.Transfer)
 }
