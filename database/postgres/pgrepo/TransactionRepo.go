@@ -25,7 +25,7 @@ type comsumeResponse struct {
 
 type consumeData struct {
 	Payment float64 `json:"request_payment"`
-	VaKey   int     `json:"va_key"`
+	VaKey   string  `json:"va_key"`
 }
 
 func (d DB) PaymentVA(ctx context.Context, req request.PaymentVA) error {
