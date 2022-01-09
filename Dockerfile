@@ -7,5 +7,6 @@ FROM alpine:3.14
 WORKDIR /app
 COPY --from=stage /app/main .
 COPY --from=stage /app/config.env .
+COPY --from=stage /app/templates .
 EXPOSE 8080
 CMD [ "./main" ]
