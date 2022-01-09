@@ -35,7 +35,7 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 
 	authInfo := postgres.CreateAuthInfoParams{
 		ID:               uuid.New(),
-		RegisteredNumber: int32(t.Month()) + int32(req.Phone[9]+req.Phone[10]+req.Phone[11]) + int32(util.RandNum(5)),
+		RegisteredNumber: int32(util.RandNum(5)),
 		Pin:              req.Pin,
 	}
 
