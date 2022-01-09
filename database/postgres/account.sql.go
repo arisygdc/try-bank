@@ -122,6 +122,17 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) erro
 	return err
 }
 
+const getAccount = `-- name: GetAccount :one
+SELECT a.id FROM accounts a INNER JOIN auth_info ai ON a.auth_info = ai.id WHERE ai.registered_number = $1
+`
+
+func (q *Queries) GetAccount(ctx context.Context, registeredNumber int32) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getAccount, registeredNumber)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getLevelID = `-- name: GetLevelID :one
 SELECT id FROM levels WHERE name = $1
 `
@@ -131,6 +142,25 @@ func (q *Queries) GetLevelID(ctx context.Context, name string) (uuid.UUID, error
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const getUserInfo = `-- name: GetUserInfo :one
+SELECT users.id, users.firstname, users.lastname, users.created_at, users.email, users.birth, users.phone FROM users INNER JOIN accounts ON users.id = accounts.users WHERE accounts.id = $1
+`
+
+func (q *Queries) GetUserInfo(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserInfo, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Firstname,
+		&i.Lastname,
+		&i.CreatedAt,
+		&i.Email,
+		&i.Birth,
+		&i.Phone,
+	)
+	return i, err
 }
 
 const getUserWallet = `-- name: GetUserWallet :one

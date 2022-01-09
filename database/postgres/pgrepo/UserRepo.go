@@ -83,3 +83,19 @@ func (r DB) Login(ctx context.Context, regNum int32, pin string) (postgres.AuthI
 		Pin:              pin,
 	})
 }
+
+func (r DB) CekSaldo(ctx context.Context, regNum int32) (float64, error) {
+	wallet, err := r.queries.GetUserWallet(ctx, regNum)
+	if err != nil {
+		return 0, err
+	}
+	return r.queries.GetBalance(ctx, wallet.UUID)
+}
+
+func (r DB) GetAccount(ctx context.Context, regNum int32) (uuid.UUID, error) {
+	return r.queries.GetAccount(ctx, regNum)
+}
+
+func (r DB) GetUser(ctx context.Context, account uuid.UUID) (postgres.User, error) {
+	return r.queries.GetUserInfo(ctx, account)
+}

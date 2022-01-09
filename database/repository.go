@@ -7,6 +7,8 @@ import (
 	"try-bank/database/postgres"
 	"try-bank/database/postgres/pgrepo"
 	"try-bank/request"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -21,6 +23,9 @@ type IRepo interface {
 	PaymentVA(ctx context.Context, req request.PaymentVA) error
 	Transfer(ctx context.Context, req request.Transfer) error
 	Login(ctx context.Context, regNum int32, pin string) (postgres.AuthInfo, error)
+	CekSaldo(ctx context.Context, regNum int32) (float64, error)
+	GetAccount(ctx context.Context, regNum int32) (uuid.UUID, error)
+	GetUser(ctx context.Context, account uuid.UUID) (postgres.User, error)
 }
 
 func NewRepository(env config.Environment) (dbsource IRepo, err error) {

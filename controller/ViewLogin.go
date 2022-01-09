@@ -11,8 +11,10 @@ func (ctr Controller) ViewLogin(ctx *gin.Context) {
 	session, _ := ctx.Cookie(SESCookieName)
 	session = strings.Trim(session, " ")
 	if session != SESLogout {
-		ctx.Redirect(http.StatusFound, LocVA.RequestURI())
-		return
+		if session != "" {
+			ctx.Redirect(http.StatusFound, LocVA.RequestURI())
+			return
+		}
 	}
 	ctx.HTML(http.StatusOK, "index.html", gin.H{})
 }

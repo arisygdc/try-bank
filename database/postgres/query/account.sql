@@ -29,5 +29,11 @@ SELECT a.wallet, ai.pin FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
 WHERE ai.registered_number = $1;
 
+-- name: GetAccount :one
+SELECT a.id FROM accounts a INNER JOIN auth_info ai ON a.auth_info = ai.id WHERE ai.registered_number = $1;
+
+-- name: GetUserInfo :one
+SELECT users.* FROM users INNER JOIN accounts ON users.id = accounts.users WHERE accounts.id = $1;
+
 -- name: Login :one
 SELECT * FROM auth_info WHERE registered_number = $1 AND pin = $2;
