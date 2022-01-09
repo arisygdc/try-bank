@@ -26,5 +26,6 @@ func main() {
 
 	server := server.NewServer(env, ctr)
 	server.ApiRoute()
+	server.WebRoute()
 	server.Run()
 }

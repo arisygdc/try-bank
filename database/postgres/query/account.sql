@@ -28,3 +28,6 @@ WHERE ai.registered_number = $1;
 SELECT a.wallet, ai.pin FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
 WHERE ai.registered_number = $1;
+
+-- name: Login :one
+SELECT * FROM auth_info WHERE registered_number = $1 AND pin = $2;

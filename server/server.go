@@ -16,6 +16,11 @@ type Server struct {
 func NewServer(env config.Environment, ctr controller.Controller) *Server {
 	engine := gin.Default()
 	gin.SetMode(env.Environment)
+	engine.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Next()
+	})
+
 	server := &Server{
 		env:        env,
 		engine:     engine,
@@ -23,11 +28,6 @@ func NewServer(env config.Environment, ctr controller.Controller) *Server {
 	}
 
 	return server
-}
-
-func (s *Server) WebRouteCustomConfig() {
-	s.engine.Delims("{{", "}}")
-	s.engine.LoadHTMLGlob("public/views")
 }
 
 func (s Server) Run() {

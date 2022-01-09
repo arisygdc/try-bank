@@ -12,3 +12,8 @@ type PostUser struct {
 	Phone     string  `from:"phone" json:"phone" binding:"required"`
 	Pin       string  `from:"pin" json:"pin" binding:"required"`
 }
+
+type LoginReq struct {
+	RegNum int32  `from:"register_number" json:"register_number" binding:"required"`
+	Pin    string `from:"pin" json:"pin" binding:"required"`
+}

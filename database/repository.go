@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"try-bank/config"
+	"try-bank/database/postgres"
 	"try-bank/database/postgres/pgrepo"
 	"try-bank/request"
 )
@@ -19,6 +20,7 @@ type IRepo interface {
 	ActivateVA(ctx context.Context, req request.VirtualAccount) (int32, string, error)
 	PaymentVA(ctx context.Context, req request.PaymentVA) error
 	Transfer(ctx context.Context, req request.Transfer) error
+	Login(ctx context.Context, regNum int32, pin string) (postgres.AuthInfo, error)
 }
 
 func NewRepository(env config.Environment) (dbsource IRepo, err error) {

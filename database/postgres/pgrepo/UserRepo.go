@@ -76,3 +76,10 @@ func (d DB) CreateUser(ctx context.Context, req request.PostUser, permission str
 		return nil
 	})
 }
+
+func (r DB) Login(ctx context.Context, regNum int32, pin string) (postgres.AuthInfo, error) {
+	return r.queries.Login(ctx, postgres.LoginParams{
+		RegisteredNumber: regNum,
+		Pin:              pin,
+	})
+}

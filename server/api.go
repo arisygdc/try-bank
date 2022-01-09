@@ -8,4 +8,5 @@ func (s *Server) ApiRoute() {
 	r.PUT("/company/va", s.controller.ActivateVA)
 	r.POST("/payment/va", s.controller.PaymentVA)
 	r.POST("/transfer", s.controller.Transfer)
+	r.POST("/login", s.controller.Login)
 }

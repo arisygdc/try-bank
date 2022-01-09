@@ -163,3 +163,19 @@ func (q *Queries) GetUserWalletAndAuth(ctx context.Context, registeredNumber int
 	err := row.Scan(&i.Wallet, &i.Pin)
 	return i, err
 }
+
+const login = `-- name: Login :one
+SELECT id, registered_number, pin FROM auth_info WHERE registered_number = $1 AND pin = $2
+`
+
+type LoginParams struct {
+	RegisteredNumber int32  `json:"registered_number"`
+	Pin              string `json:"pin"`
+}
+
+func (q *Queries) Login(ctx context.Context, arg LoginParams) (AuthInfo, error) {
+	row := q.db.QueryRowContext(ctx, login, arg.RegisteredNumber, arg.Pin)
+	var i AuthInfo
+	err := row.Scan(&i.ID, &i.RegisteredNumber, &i.Pin)
+	return i, err
+}
