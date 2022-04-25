@@ -36,12 +36,17 @@ func NewRepo(env config.Environment) (dbsource IRepo, err error) {
 }
 
 // implementing new repository
+type IRepository interface {
+	Query() *postgresql.Queries
+	QueryTx(ctx context.Context, statement func(*postgresql.Queries) error) error
+}
+
 type Repository struct {
 	sqlConn *sql.DB
 	query   *postgresql.Queries
 }
 
-func NewRepository(env config.Environment, ctx context.Context) (Repository, error) {
+func NewRepository(env config.Environment, ctx context.Context) (IRepository, error) {
 	if env.DBDriver == PostgreDriver {
 		createSqlconn, err := sql.Open(env.DBDriver, env.DBSource)
 		if err != nil {
