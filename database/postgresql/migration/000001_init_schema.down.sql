@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS auth_info;
+DROP TABLE IF EXISTS levels;
+DROP TABLE IF EXISTS wallets;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS companies;
+DROP TABLE IF EXISTS virtual_account;
+DROP TABLE IF EXISTS companies_account;
+DROP TABLE IF EXISTS va_payment;
+DROP TABLE IF EXISTS issued_payment
+DROP TABLE IF EXISTS transfers;
