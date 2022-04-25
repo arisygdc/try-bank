@@ -18,11 +18,14 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	repo, err := database.NewRepository(env)
+	// deprecated repository
+	repo, err := database.NewRepo(env)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ctr := controller.NewController(repo)
+
+	// deprecated controller
+	ctr := controller.New(repo)
 
 	server := server.NewServer(env, ctr)
 	server.ApiRoute()
