@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c Controller) CreateLevel(ctx *gin.Context) {
+func (c DeprecatedController) CreateLevel(ctx *gin.Context) {
 	var req request.PermissionReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

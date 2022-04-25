@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c Controller) CreateCompany(ctx *gin.Context) {
+func (c DeprecatedController) CreateCompany(ctx *gin.Context) {
 	var req request.PostCompany
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
