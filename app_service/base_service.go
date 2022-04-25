@@ -7,13 +7,16 @@ import (
 	"try-bank/database"
 )
 
+type ISBase interface {
+}
+
 type BaseService struct {
 	Account        account.Service
 	Company        company.Service
 	VirtualAccount virtualaccount.Service
 }
 
-func NewService(repository database.IRepository) BaseService {
+func NewService(repository database.IRepository) ISBase {
 	return BaseService{
 		Account:        account.New(repository),
 		Company:        company.New(repository),

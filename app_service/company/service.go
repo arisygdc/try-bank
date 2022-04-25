@@ -2,6 +2,9 @@ package company
 
 import "try-bank/database"
 
+type ISCompany interface {
+}
+
 type Service struct {
 	repos database.IRepository
 }

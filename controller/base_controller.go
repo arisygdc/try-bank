@@ -7,12 +7,19 @@ import (
 	virtualaccount "try-bank/controller/virtual_account"
 )
 
-type Controller struct {
-	Account        account.AccountController
-	Company        company.CompanyController
-	VirtualAccount virtualaccount.VirtualAccountController
+type ICtrBase interface {
 }
 
-func NewController(service appservice.BaseService) {
+type BaseController struct {
+	Account        account.ICtrAccount
+	Company        company.ICtrCompany
+	VirtualAccount virtualaccount.ICtrVirtualAccount
+}
 
+func NewController(service appservice.ISBase) ICtrBase {
+	return BaseController{
+		Account:        account.New(service),
+		Company:        company.New(service),
+		VirtualAccount: virtualaccount.New(service),
+	}
 }

@@ -2,6 +2,9 @@ package account
 
 import "try-bank/database"
 
+type ISAccount interface {
+}
+
 type Service struct {
 	repos database.IRepository
 }

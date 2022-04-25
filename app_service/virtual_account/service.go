@@ -2,6 +2,9 @@ package virtualaccount
 
 import "try-bank/database"
 
+type ISVirtualAccount interface {
+}
+
 type Service struct {
 	repos database.IRepository
 }
