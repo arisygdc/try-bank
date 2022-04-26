@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 	"try-bank/app_service/account"
-	"try-bank/config"
 	"try-bank/database"
 
 	"github.com/stretchr/testify/assert"
@@ -13,9 +12,8 @@ import (
 
 func TestUserAccount(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	env, err := config.NewEnv("../")
+	env := getDBConf()
 	defer cancel()
-	assert.Nil(t, err)
 
 	repos, err := database.NewRepository(env, ctx)
 	assert.Nil(t, err)
