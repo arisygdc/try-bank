@@ -3,9 +3,9 @@ package account
 import "try-bank/database"
 
 const (
-	LevelAdmin   = "admin"
-	LevelUser    = "user"
-	LevelCompany = "company"
+	LevelAdmin       = "admin"
+	LevelClientUser  = "client"
+	LevelCompanyUser = "company"
 )
 
 type ISAccount interface {
