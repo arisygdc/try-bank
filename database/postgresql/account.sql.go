@@ -12,25 +12,36 @@ import (
 	"github.com/google/uuid"
 )
 
+const accountType = `-- name: AccountType :one
+SELECT id, max_transfer, name FROM account_type WHERE name = $1
+`
+
+func (q *Queries) AccountType(ctx context.Context, name string) (AccountType, error) {
+	row := q.db.QueryRowContext(ctx, accountType, name)
+	var i AccountType
+	err := row.Scan(&i.ID, &i.MaxTransfer, &i.Name)
+	return i, err
+}
+
 const createAccount = `-- name: CreateAccount :exec
-INSERT INTO accounts (id, users, auth_info, wallet, level) VALUES ($1, $2, $3, $4, $5)
+INSERT INTO accounts (id, cutomer_id, auth_info_id, wallet_id, account_type_id) VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateAccountParams struct {
-	ID       uuid.UUID `json:"id"`
-	Users    uuid.UUID `json:"users"`
-	AuthInfo uuid.UUID `json:"auth_info"`
-	Wallet   uuid.UUID `json:"wallet"`
-	Level    uuid.UUID `json:"level"`
+	ID            uuid.UUID `json:"id"`
+	CutomerID     uuid.UUID `json:"cutomer_id"`
+	AuthInfoID    uuid.UUID `json:"auth_info_id"`
+	WalletID      uuid.UUID `json:"wallet_id"`
+	AccountTypeID uuid.UUID `json:"account_type_id"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) error {
 	_, err := q.db.ExecContext(ctx, createAccount,
 		arg.ID,
-		arg.Users,
-		arg.AuthInfo,
-		arg.Wallet,
-		arg.Level,
+		arg.CutomerID,
+		arg.AuthInfoID,
+		arg.WalletID,
+		arg.AccountTypeID,
 	)
 	return err
 }
@@ -51,17 +62,28 @@ func (q *Queries) CreateAuthInfo(ctx context.Context, arg CreateAuthInfoParams) 
 	return registered_number, err
 }
 
-const createLevel = `-- name: CreateLevel :exec
-INSERT INTO levels (id, name) VALUES ($1, $2)
+const createCustomer = `-- name: CreateCustomer :exec
+INSERT INTO cutomers (id, firstname, lastname, created_at, email, birth, phone) VALUES ($1, $2, $3, DEFAULT, $4, $5, $6)
 `
 
-type CreateLevelParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+type CreateCustomerParams struct {
+	ID        uuid.UUID `json:"id"`
+	Firstname string    `json:"firstname"`
+	Lastname  string    `json:"lastname"`
+	Email     string    `json:"email"`
+	Birth     time.Time `json:"birth"`
+	Phone     string    `json:"phone"`
 }
 
-func (q *Queries) CreateLevel(ctx context.Context, arg CreateLevelParams) error {
-	_, err := q.db.ExecContext(ctx, createLevel, arg.ID, arg.Name)
+func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) error {
+	_, err := q.db.ExecContext(ctx, createCustomer,
+		arg.ID,
+		arg.Firstname,
+		arg.Lastname,
+		arg.Email,
+		arg.Birth,
+		arg.Phone,
+	)
 	return err
 }
 
@@ -86,31 +108,6 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 	return err
 }
 
-const createUser = `-- name: CreateUser :exec
-INSERT INTO users (id, firstname, lastname, created_at, email, birth, phone) VALUES ($1, $2, $3, DEFAULT, $4, $5, $6)
-`
-
-type CreateUserParams struct {
-	ID        uuid.UUID `json:"id"`
-	Firstname string    `json:"firstname"`
-	Lastname  string    `json:"lastname"`
-	Email     string    `json:"email"`
-	Birth     time.Time `json:"birth"`
-	Phone     string    `json:"phone"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser,
-		arg.ID,
-		arg.Firstname,
-		arg.Lastname,
-		arg.Email,
-		arg.Birth,
-		arg.Phone,
-	)
-	return err
-}
-
 const createWallet = `-- name: CreateWallet :exec
 INSERT INTO wallets (id, balance, last_update) VALUES ($1, $2, DEFAULT)
 `
@@ -125,44 +122,33 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) erro
 	return err
 }
 
-const getLevel = `-- name: GetLevel :one
-SELECT id, name FROM levels WHERE name = $1
-`
-
-func (q *Queries) GetLevel(ctx context.Context, name string) (Level, error) {
-	row := q.db.QueryRowContext(ctx, getLevel, name)
-	var i Level
-	err := row.Scan(&i.ID, &i.Name)
-	return i, err
-}
-
 const getUserWallet = `-- name: GetUserWallet :one
-SELECT a.wallet FROM accounts a
+SELECT a.wallet_id FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
 WHERE ai.registered_number = $1
 `
 
 func (q *Queries) GetUserWallet(ctx context.Context, registeredNumber int32) (uuid.NullUUID, error) {
 	row := q.db.QueryRowContext(ctx, getUserWallet, registeredNumber)
-	var wallet uuid.NullUUID
-	err := row.Scan(&wallet)
-	return wallet, err
+	var wallet_id uuid.NullUUID
+	err := row.Scan(&wallet_id)
+	return wallet_id, err
 }
 
 const getUserWalletAndAuth = `-- name: GetUserWalletAndAuth :one
-SELECT a.wallet, ai.pin FROM accounts a
+SELECT a.wallet_id, ai.pin FROM accounts a
 RIGHT JOIN auth_info ai ON ai.id = a.auth_info
 WHERE ai.registered_number = $1
 `
 
 type GetUserWalletAndAuthRow struct {
-	Wallet uuid.NullUUID `json:"wallet"`
-	Pin    string        `json:"pin"`
+	WalletID uuid.NullUUID `json:"wallet_id"`
+	Pin      string        `json:"pin"`
 }
 
 func (q *Queries) GetUserWalletAndAuth(ctx context.Context, registeredNumber int32) (GetUserWalletAndAuthRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserWalletAndAuth, registeredNumber)
 	var i GetUserWalletAndAuthRow
-	err := row.Scan(&i.Wallet, &i.Pin)
+	err := row.Scan(&i.WalletID, &i.Pin)
 	return i, err
 }

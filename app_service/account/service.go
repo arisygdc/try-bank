@@ -1,14 +1,18 @@
 package account
 
-import "try-bank/database"
+import (
+	"context"
+	"try-bank/database"
+)
 
 const (
-	LevelAdmin       = "admin"
-	LevelClientUser  = "client"
-	LevelCompanyUser = "company"
+	LevelSilver   = "silver"
+	LevelGold     = "gold"
+	LevelPlatinum = "platinum"
 )
 
 type ISAccount interface {
+	CreateUserAccount(ctx context.Context, param CreateUserParam) (RegisterUserDetail, error)
 }
 
 type Service struct {

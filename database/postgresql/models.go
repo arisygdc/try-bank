@@ -11,11 +11,17 @@ import (
 )
 
 type Account struct {
-	ID       uuid.UUID `json:"id"`
-	Users    uuid.UUID `json:"users"`
-	AuthInfo uuid.UUID `json:"auth_info"`
-	Wallet   uuid.UUID `json:"wallet"`
-	Level    uuid.UUID `json:"level"`
+	ID            uuid.UUID `json:"id"`
+	CutomerID     uuid.UUID `json:"cutomer_id"`
+	AuthInfoID    uuid.UUID `json:"auth_info_id"`
+	WalletID      uuid.UUID `json:"wallet_id"`
+	AccountTypeID uuid.UUID `json:"account_type_id"`
+}
+
+type AccountType struct {
+	ID          uuid.UUID `json:"id"`
+	MaxTransfer float64   `json:"max_transfer"`
+	Name        string    `json:"name"`
 }
 
 type AuthInfo struct {
@@ -40,16 +46,21 @@ type Company struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Cutomer struct {
+	ID        uuid.UUID `json:"id"`
+	Firstname string    `json:"firstname"`
+	Lastname  string    `json:"lastname"`
+	CreatedAt time.Time `json:"created_at"`
+	Email     string    `json:"email"`
+	Birth     time.Time `json:"birth"`
+	Phone     string    `json:"phone"`
+}
+
 type IssuedPayment struct {
 	ID                   uuid.UUID `json:"id"`
 	VirtualAccountID     uuid.UUID `json:"virtual_account_id"`
 	VirtualAccountNumber int32     `json:"virtual_account_number"`
 	PaymentCharge        float64   `json:"payment_charge"`
-}
-
-type Level struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
 }
 
 type Transfer struct {
@@ -58,16 +69,6 @@ type Transfer struct {
 	ToWallet     uuid.UUID `json:"to_wallet"`
 	Balance      float64   `json:"balance"`
 	TransferedAt time.Time `json:"transfered_at"`
-}
-
-type User struct {
-	ID        uuid.UUID `json:"id"`
-	Firstname string    `json:"firstname"`
-	Lastname  string    `json:"lastname"`
-	CreatedAt time.Time `json:"created_at"`
-	Email     string    `json:"email"`
-	Birth     time.Time `json:"birth"`
-	Phone     string    `json:"phone"`
 }
 
 type VaPayment struct {

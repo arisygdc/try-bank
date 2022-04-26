@@ -13,7 +13,7 @@ type CreateUserParam struct {
 	Firstname, Lastname, Email, Phone, Pin string
 	Birth                                  time.Time
 	TopUp                                  float64
-	Level                                  string
+	AccountType                            uuid.UUID
 }
 
 type RegisterUserDetail struct {
@@ -23,20 +23,10 @@ type RegisterUserDetail struct {
 	RegisteredNumber   int32
 }
 
-func (svc Service) CreateUserAccount(ctx context.Context, param CreateUserParam) (RegisterUserDetail, error) {
+func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateUserParam) (RegisterUserDetail, error) {
 	var detailUser = RegisterUserDetail{}
 
-	lvl, err := svc.GetLevel(ctx, param.Level)
-	if err != nil {
-		return detailUser, err
-	}
-
-	// Still handle create client user only
-	if lvl.Name != LevelClientUser {
-		return detailUser, err
-	}
-
-	user_param := postgresql.CreateUserParams{
+	customer_param := postgresql.CreateCustomerParams{
 		ID:        uuid.New(),
 		Firstname: param.Firstname,
 		Lastname:  param.Lastname,
@@ -56,15 +46,15 @@ func (svc Service) CreateUserAccount(ctx context.Context, param CreateUserParam)
 	}
 
 	account := postgresql.CreateAccountParams{
-		ID:       uuid.New(),
-		Users:    user_param.ID,
-		AuthInfo: authInfo_param.ID,
-		Wallet:   wallet_param.ID,
-		Level:    lvl.ID,
+		ID:            uuid.New(),
+		CutomerID:     customer_param.ID,
+		AuthInfoID:    authInfo_param.ID,
+		WalletID:      wallet_param.ID,
+		AccountTypeID: param.AccountType,
 	}
 
-	err = svc.repos.QueryTx(ctx, func(q *postgresql.Queries) error {
-		err := q.CreateUser(ctx, user_param)
+	err := svc.repos.QueryTx(ctx, func(q *postgresql.Queries) error {
+		err := q.CreateCustomer(ctx, customer_param)
 		if err != nil {
 			return err
 		}
@@ -89,7 +79,7 @@ func (svc Service) CreateUserAccount(ctx context.Context, param CreateUserParam)
 		return detailUser, err
 	}
 
-	detailUser.Name = fmt.Sprintf("%s %s", user_param.Firstname, user_param.Lastname)
+	detailUser.Name = fmt.Sprintf("%s %s", customer_param.Firstname, customer_param.Lastname)
 	detailUser.Email = param.Email
 	detailUser.Birth = param.Birth
 	detailUser.TopUp = param.TopUp
