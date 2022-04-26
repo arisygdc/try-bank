@@ -2,6 +2,12 @@ package account
 
 import "try-bank/database"
 
+const (
+	LevelAdmin   = "admin"
+	LevelUser    = "user"
+	LevelCompany = "company"
+)
+
 type ISAccount interface {
 }
 
