@@ -4,7 +4,7 @@ CREATE SEQUENCE register_number
    START 1000000
    INCREMENT 1;
 
-CREATE TABLE users (
+CREATE TABLE cutomers (
     id UUID PRIMARY KEY NOT NULL,
     firstname VARCHAR(30) NOT NULL,
     lastname VARCHAR(30) NOT NULL,
@@ -20,8 +20,9 @@ CREATE TABLE auth_info (
     pin VARCHAR(150) NOT NULL
 );
 
-CREATE TABLE levels (
+CREATE TABLE account_type (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+    max_transfer FLOAT NOT NULL,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
@@ -33,26 +34,26 @@ CREATE TABLE wallets (
 
 CREATE TABLE accounts (
     id UUID PRIMARY KEY NOT NULL,
-    users UUID NOT NULL UNIQUE,
-    auth_info UUID NOT NULL UNIQUE,
-    wallet UUID NOT NULL UNIQUE,
-    level UUID NOT NULL,
+    cutomer_id UUID NOT NULL UNIQUE,
+    auth_info_id UUID NOT NULL UNIQUE,
+    wallet_id UUID NOT NULL UNIQUE,
+    account_type_id UUID NOT NULL,
     
-    CONSTRAINT users
-        FOREIGN KEY (users)
-        REFERENCES users(id),
+    CONSTRAINT cutomers
+        FOREIGN KEY (cutomer_id)
+        REFERENCES cutomers(id),
 
     CONSTRAINT auth_info
-        FOREIGN KEY (auth_info)
+        FOREIGN KEY (auth_info_id)
         REFERENCES auth_info(id),
 
     CONSTRAINT wallets
-        FOREIGN KEY (wallet)
+        FOREIGN KEY (wallet_id)
         REFERENCES wallets(id),
 
-    CONSTRAINT levels
-        FOREIGN KEY (level)
-        REFERENCES levels(id)
+    CONSTRAINT account_type
+        FOREIGN KEY (account_type_id)
+        REFERENCES account_type(id)
 );
 
 CREATE TABLE companies (
@@ -132,6 +133,6 @@ CREATE INDEX ON transfers (from_wallet);
 
 CREATE INDEX ON transfers (to_wallet);
 
-INSERT INTO levels (name) VALUES ('admin');
-INSERT INTO levels (name) VALUES ('client');
-INSERT INTO levels (name) VALUES ('company');
+INSERT INTO account_type (name, max_transfer) VALUES ('silver', 5000000);
+INSERT INTO account_type (name, max_transfer) VALUES ('gold', 15000000);
+INSERT INTO account_type (name, max_transfer) VALUES ('platinum', 50000000);
