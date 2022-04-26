@@ -83,7 +83,7 @@ CREATE TABLE companies_account (
         FOREIGN KEY (company_id)
         REFERENCES companies(id),
     
-     CONSTRAINT wallets
+    CONSTRAINT wallets
         FOREIGN KEY (wallet_id)
         REFERENCES wallets(id),
 
