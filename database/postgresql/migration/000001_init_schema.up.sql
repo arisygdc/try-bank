@@ -1,3 +1,7 @@
+CREATE SEQUENCE register_number
+   START 1000000
+   INCREMENT 1;
+
 CREATE TABLE users (
     id UUID PRIMARY KEY NOT NULL,
     firstname VARCHAR(30) NOT NULL,
@@ -10,7 +14,7 @@ CREATE TABLE users (
 
 CREATE TABLE auth_info (
     id UUID PRIMARY KEY NOT NULL,
-    registered_number INT NOT NULL,
+    registered_number INT DEFAULT nextval('register_number') NOT NULL,
     pin VARCHAR(150) NOT NULL
 );
 

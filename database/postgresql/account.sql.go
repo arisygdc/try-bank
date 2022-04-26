@@ -35,19 +35,20 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) er
 	return err
 }
 
-const createAuthInfo = `-- name: CreateAuthInfo :exec
-INSERT INTO auth_info (id, registered_number, pin) VALUES ($1, $2, $3)
+const createAuthInfo = `-- name: CreateAuthInfo :one
+INSERT INTO auth_info (id, registered_number, pin) VALUES ($1, DEFAULT, $2) RETURNING registered_number
 `
 
 type CreateAuthInfoParams struct {
-	ID               uuid.UUID `json:"id"`
-	RegisteredNumber int32     `json:"registered_number"`
-	Pin              string    `json:"pin"`
+	ID  uuid.UUID `json:"id"`
+	Pin string    `json:"pin"`
 }
 
-func (q *Queries) CreateAuthInfo(ctx context.Context, arg CreateAuthInfoParams) error {
-	_, err := q.db.ExecContext(ctx, createAuthInfo, arg.ID, arg.RegisteredNumber, arg.Pin)
-	return err
+func (q *Queries) CreateAuthInfo(ctx context.Context, arg CreateAuthInfoParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createAuthInfo, arg.ID, arg.Pin)
+	var registered_number int32
+	err := row.Scan(&registered_number)
+	return registered_number, err
 }
 
 const createLevel = `-- name: CreateLevel :exec
@@ -124,15 +125,15 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) erro
 	return err
 }
 
-const getLevelID = `-- name: GetLevelID :one
-SELECT id FROM levels WHERE name = $1
+const getLevel = `-- name: GetLevel :one
+SELECT id, name FROM levels WHERE name = $1
 `
 
-func (q *Queries) GetLevelID(ctx context.Context, name string) (uuid.UUID, error) {
-	row := q.db.QueryRowContext(ctx, getLevelID, name)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+func (q *Queries) GetLevel(ctx context.Context, name string) (Level, error) {
+	row := q.db.QueryRowContext(ctx, getLevel, name)
+	var i Level
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
 }
 
 const getUserWallet = `-- name: GetUserWallet :one
