@@ -7,7 +7,7 @@ INSERT INTO companies_account (id, company_id, auth_info_id, wallet_id, virtual_
 -- name: CreateVirtualAccount :exec
 INSERT INTO virtual_account (id, authorization_key, identity, callback_url, created_at) VALUES ($1, $2, $3, $4, DEFAULT);
 
--- name: UpdateVAstatus :exec
+-- name: SetCompanyVA :exec
 UPDATE companies_account SET virtual_account_id = $1 WHERE id = $2;
 
 -- name: CreateVAPayment :exec

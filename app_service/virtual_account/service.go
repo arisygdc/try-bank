@@ -1,8 +1,12 @@
 package virtualaccount
 
-import "try-bank/database"
+import (
+	"context"
+	"try-bank/database"
+)
 
 type ISVirtualAccount interface {
+	Register(ctx context.Context, callback_url string) (RegistertrationVirtualAccountDetail, error)
 }
 
 type Service struct {

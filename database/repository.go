@@ -75,7 +75,9 @@ func (repos Repository) QueryTx(ctx context.Context, statement func(*postgresql.
 	QueryTx := repos.query.WithTx(tx)
 	errorTx := statement(QueryTx)
 	if errorTx != nil {
-		tx.Rollback()
+		if errRollback := tx.Rollback(); errRollback != nil {
+			return errRollback
+		}
 		return errorTx
 	}
 	tx.Commit()
