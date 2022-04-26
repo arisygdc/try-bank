@@ -4,19 +4,19 @@ pgPassword := secret
 databaseName := bank
 
 installpg:
-	docker run -d --name ${pgname} -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=${pgPassword} -e POSTGRES_DB=${databaseName} postgres:12-alpine3.14
+	docker run -d --name ${pgName} -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=${pgPassword} -e POSTGRES_DB=${databaseName} postgres:12-alpine3.14
 
 uninstallpg:
-	docker container rm ${pgname}
+	docker container rm ${pgName}
 
 startpg:
-	docker start ${pgname}
+	docker start ${pgName}
 
 stoppg:
-	docker stop ${pgname}
+	docker stop ${pgName}
 
 execpg:
-	docker exec -it ${pgname} psql -U postgres
+	docker exec -it ${pgName} psql -U postgres
 
 createmigrate:
 	migrate create -ext sql -dir database/migration -seq init_schema
