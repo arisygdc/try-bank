@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE SEQUENCE register_number
    START 1000000
    INCREMENT 1;
@@ -19,7 +21,7 @@ CREATE TABLE auth_info (
 );
 
 CREATE TABLE levels (
-    id UUID PRIMARY KEY NOT NULL,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
@@ -130,6 +132,6 @@ CREATE INDEX ON transfers (from_wallet);
 
 CREATE INDEX ON transfers (to_wallet);
 
-INSERT INTO levels (name) VALUES ('admin')
-INSERT INTO levels (name) VALUES ('client')
-INSERT INTO levels (name) VALUES ('company')
+INSERT INTO levels (name) VALUES ('admin');
+INSERT INTO levels (name) VALUES ('client');
+INSERT INTO levels (name) VALUES ('company');
