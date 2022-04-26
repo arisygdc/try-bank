@@ -129,3 +129,7 @@ ALTER TABLE transfers ADD FOREIGN KEY (to_wallet) REFERENCES wallets(id);
 CREATE INDEX ON transfers (from_wallet);
 
 CREATE INDEX ON transfers (to_wallet);
+
+INSERT INTO levels (name) VALUES ('admin')
+INSERT INTO levels (name) VALUES ('client')
+INSERT INTO levels (name) VALUES ('company')
