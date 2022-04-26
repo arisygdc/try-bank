@@ -90,17 +90,17 @@ func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAcc
 	return err
 }
 
-const updateVAstatus = `-- name: UpdateVAstatus :exec
+const setCompanyVA = `-- name: SetCompanyVA :exec
 UPDATE companies_account SET virtual_account_id = $1 WHERE id = $2
 `
 
-type UpdateVAstatusParams struct {
+type SetCompanyVAParams struct {
 	VirtualAccountID uuid.NullUUID `json:"virtual_account_id"`
 	ID               uuid.UUID     `json:"id"`
 }
 
-func (q *Queries) UpdateVAstatus(ctx context.Context, arg UpdateVAstatusParams) error {
-	_, err := q.db.ExecContext(ctx, updateVAstatus, arg.VirtualAccountID, arg.ID)
+func (q *Queries) SetCompanyVA(ctx context.Context, arg SetCompanyVAParams) error {
+	_, err := q.db.ExecContext(ctx, setCompanyVA, arg.VirtualAccountID, arg.ID)
 	return err
 }
 

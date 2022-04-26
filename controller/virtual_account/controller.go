@@ -2,9 +2,12 @@ package virtualaccount
 
 import (
 	appservice "try-bank/app_service"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ICtrVirtualAccount interface {
+	Register(ctx *gin.Context)
 }
 
 type VirtualAccountController struct {
