@@ -101,6 +101,7 @@ CREATE TABLE issued_payment (
     virtual_account_id UUID NOT NULL,
     virtual_account_number INT NOT NULL,
     payment_charge FLOAT NOT NULL,
+    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT virtual_account 
         FOREIGN KEY (virtual_account_id)
