@@ -110,7 +110,7 @@ CREATE TABLE issued_payment (
 
 CREATE TABLE va_payment (
     id UUID PRIMARY KEY NOT NULL,
-    issued_payment_id UUID NOT NULL,
+    issued_payment_id UUID UNIQUE NOT NULL,
     paid_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT issued_payment
