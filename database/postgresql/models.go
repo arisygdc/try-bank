@@ -61,6 +61,7 @@ type IssuedPayment struct {
 	VirtualAccountID     uuid.UUID `json:"virtual_account_id"`
 	VirtualAccountNumber int32     `json:"virtual_account_number"`
 	PaymentCharge        float64   `json:"payment_charge"`
+	IssuedAt             time.Time `json:"issued_at"`
 }
 
 type Transfer struct {
