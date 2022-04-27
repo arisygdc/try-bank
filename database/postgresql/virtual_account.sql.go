@@ -11,6 +11,28 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkIssuedPaymentVA = `-- name: CheckIssuedPaymentVA :one
+SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2
+`
+
+type CheckIssuedPaymentVAParams struct {
+	VirtualAccountID     uuid.UUID `json:"virtual_account_id"`
+	VirtualAccountNumber int32     `json:"virtual_account_number"`
+}
+
+func (q *Queries) CheckIssuedPaymentVA(ctx context.Context, arg CheckIssuedPaymentVAParams) (IssuedPayment, error) {
+	row := q.db.QueryRowContext(ctx, checkIssuedPaymentVA, arg.VirtualAccountID, arg.VirtualAccountNumber)
+	var i IssuedPayment
+	err := row.Scan(
+		&i.ID,
+		&i.VirtualAccountID,
+		&i.VirtualAccountNumber,
+		&i.PaymentCharge,
+		&i.IssuedAt,
+	)
+	return i, err
+}
+
 const issuePaymentVA = `-- name: IssuePaymentVA :exec
 INSERT INTO issued_payment (id, virtual_account_id, virtual_account_number, payment_charge) VALUES ($1, $2, $3, $4)
 `
@@ -30,4 +52,26 @@ func (q *Queries) IssuePaymentVA(ctx context.Context, arg IssuePaymentVAParams) 
 		arg.PaymentCharge,
 	)
 	return err
+}
+
+const paymentVA = `-- name: PaymentVA :one
+INSERT INTO va_payment (issued_payment_id) VALUES ($1) RETURNING id, issued_payment_id, paid_at
+`
+
+func (q *Queries) PaymentVA(ctx context.Context, issuedPaymentID uuid.UUID) (VaPayment, error) {
+	row := q.db.QueryRowContext(ctx, paymentVA, issuedPaymentID)
+	var i VaPayment
+	err := row.Scan(&i.ID, &i.IssuedPaymentID, &i.PaidAt)
+	return i, err
+}
+
+const virtualAccountID = `-- name: VirtualAccountID :one
+SELECT id FROM virtual_account WHERE identity = $1
+`
+
+func (q *Queries) VirtualAccountID(ctx context.Context, identity int32) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, virtualAccountID, identity)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
