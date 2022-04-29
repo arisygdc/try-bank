@@ -10,10 +10,10 @@ import (
 type Server struct {
 	env        config.Environment
 	engine     *gin.Engine
-	controller controller.Controller
+	controller controller.DeprecatedController
 }
 
-func NewServer(env config.Environment, ctr controller.Controller) *Server {
+func NewServer(env config.Environment, ctr controller.DeprecatedController) *Server {
 	engine := gin.Default()
 	gin.SetMode(env.Environment)
 	server := &Server{

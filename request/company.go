@@ -1,5 +1,6 @@
 package request
 
+// deprecated request
 type VirtualAccount struct {
 	FQDNCheck string `from:"fqdn_check" json:"fqdn_check" binding:"required"`
 	FQDNPay   string `from:"fqdn_pay" json:"fqdn_pay" binding:"required"`
@@ -15,4 +16,12 @@ type PostCompany struct {
 	Phone string  `from:"phone" json:"phone" binding:"required"`
 	TopUp float64 `from:"top_up" json:"top_up" binding:"required"`
 	Pin   string  `from:"pin" json:"pin" binding:"required"`
+}
+
+// new request
+
+type RegisterVirtualAccount struct {
+	AuthorizationKEY string `json:"auth_key" binding:"required"`
+	Identity         int32  `json:"identity" binding:"required"`
+	CallbackURL      string `json:"callback_url" binding:"required"`
 }

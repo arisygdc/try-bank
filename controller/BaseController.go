@@ -4,12 +4,13 @@ import (
 	"try-bank/database"
 )
 
-type Controller struct {
+// deprecated controller
+type DeprecatedController struct {
 	Repo database.IRepo
 }
 
-func NewController(repository database.IRepo) (controller Controller) {
-	controller = Controller{
+func New(repository database.IRepo) (controller DeprecatedController) {
+	controller = DeprecatedController{
 		Repo: repository,
 	}
 	return

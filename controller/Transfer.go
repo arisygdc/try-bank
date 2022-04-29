@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c Controller) Transfer(ctx *gin.Context) {
+func (c DeprecatedController) Transfer(ctx *gin.Context) {
 	var req request.Transfer
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

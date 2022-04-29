@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c Controller) ActivateVA(ctx *gin.Context) {
+func (c DeprecatedController) ActivateVA(ctx *gin.Context) {
 	var req request.VirtualAccount
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

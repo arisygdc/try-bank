@@ -3,7 +3,13 @@ package util
 import (
 	"math/rand"
 	"strconv"
+	"strings"
+	"time"
 )
+
+func StrToTime(strTime string) (time.Time, error) {
+	return time.Parse("2006-1-2", strings.Trim(strTime, " "))
+}
 
 func RandString(leng int) string {
 	var letter = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
