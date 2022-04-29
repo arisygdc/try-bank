@@ -93,6 +93,7 @@ func (svc Service) CreateCompanyAccount(ctx context.Context, param RegisterCompa
 	return registered, err
 }
 
+// Company account is confident information about all uuid table relation
 func (svc Service) CompanyAccount(ctx context.Context, regNum_comp int32) (CompaniesAccount, error) {
 	ca, err := svc.repos.Query().AuthGetCompaniesAccount(ctx, regNum_comp)
 	return CompaniesAccount(ca), err
