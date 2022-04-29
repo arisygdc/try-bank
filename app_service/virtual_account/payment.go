@@ -2,6 +2,7 @@ package virtualaccount
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,7 +14,8 @@ type PaidVA struct {
 	PaidAt          time.Time
 }
 
+// TODO use transaction to subtract payer wallet and increase company wallet
 func (svc Service) PaymentVirtualAccount(ctx context.Context, IssuedPayment_id uuid.UUID) (PaidVA, error) {
-	paid, err := svc.repos.Query().PaymentVA(ctx, IssuedPayment_id)
-	return PaidVA(paid), err
+	paid, _ := svc.repos.Query().PaymentVA(ctx, IssuedPayment_id)
+	return PaidVA(paid), errors.New("<- todo")
 }
