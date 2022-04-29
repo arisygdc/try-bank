@@ -36,6 +36,7 @@ func (ctr CompanyController) RegisterCompany(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
