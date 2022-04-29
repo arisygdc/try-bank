@@ -16,6 +16,13 @@ type RegistertrationVirtualAccountDetail struct {
 	Callback_url     string
 }
 
+// Register virtual account to enable virtual account feature.
+// callback_url is company api endpoint give payment notification to company.
+
+// will return RegistertrationVirtualAccountDetail
+// Identity is an identifier for virtual account payment
+// company will send api request about virtual account
+// AuthorizationKey as the right to access the api virtual account
 func (svc Service) Register(ctx context.Context, company_id uuid.UUID, callback_url string) (RegistertrationVirtualAccountDetail, error) {
 	var outputDetail RegistertrationVirtualAccountDetail
 	id := uuid.New()
