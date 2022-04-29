@@ -43,7 +43,7 @@ func getRegisterClientParam(accountType_id uuid.UUID) []account.CreateCostumerPa
 func getRegisterCompanyParam() []company.RegisterCompanyParam {
 	var outputParam = []company.RegisterCompanyParam{
 		{
-			PublicInfo_comp: company.PublicInfo_comp{
+			PublicInfo_company: company.PublicInfo_company{
 				Name:  "company companyan",
 				Email: "mail@company.com",
 				Phone: "081638293643",
