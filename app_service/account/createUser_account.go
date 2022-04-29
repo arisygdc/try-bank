@@ -9,22 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateUserParam struct {
+type CreateCostumerParam struct {
 	Firstname, Lastname, Email, Phone, Pin string
 	Birth                                  time.Time
 	TopUp                                  float64
 	AccountType                            uuid.UUID
 }
 
-type RegisterUserDetail struct {
+type RegisterCostumerDetail struct {
 	Name, Email, Phone string
 	Birth              time.Time
 	TopUp              float64
 	RegisteredNumber   int32
 }
 
-func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateUserParam) (RegisterUserDetail, error) {
-	var detailUser = RegisterUserDetail{}
+func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateCostumerParam) (RegisterCostumerDetail, error) {
+	var detailCostumer = RegisterCostumerDetail{}
 
 	customer_param := postgresql.CreateCustomerParams{
 		ID:        uuid.New(),
@@ -59,7 +59,7 @@ func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateUserPa
 			return err
 		}
 
-		detailUser.RegisteredNumber, err = q.CreateAuthInfo(ctx, authInfo_param)
+		detailCostumer.RegisteredNumber, err = q.CreateAuthInfo(ctx, authInfo_param)
 
 		if err != nil {
 			return err
@@ -76,14 +76,14 @@ func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateUserPa
 	})
 
 	if err != nil {
-		return detailUser, err
+		return detailCostumer, err
 	}
 
-	detailUser.Name = fmt.Sprintf("%s %s", customer_param.Firstname, customer_param.Lastname)
-	detailUser.Email = param.Email
-	detailUser.Birth = param.Birth
-	detailUser.TopUp = param.TopUp
-	detailUser.Phone = param.Phone
+	detailCostumer.Name = fmt.Sprintf("%s %s", customer_param.Firstname, customer_param.Lastname)
+	detailCostumer.Email = param.Email
+	detailCostumer.Birth = param.Birth
+	detailCostumer.TopUp = param.TopUp
+	detailCostumer.Phone = param.Phone
 
-	return detailUser, err
+	return detailCostumer, err
 }

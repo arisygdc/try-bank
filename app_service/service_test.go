@@ -26,8 +26,8 @@ func getRepository(ctx context.Context) (database.IRepository, error) {
 
 }
 
-func getRegisterClientParam(accountType_id uuid.UUID) []account.CreateUserParam {
-	return []account.CreateUserParam{
+func getRegisterClientParam(accountType_id uuid.UUID) []account.CreateCostumerParam {
+	return []account.CreateCostumerParam{
 		{
 			Firstname:   "arisy",
 			Lastname:    "musyafa'",

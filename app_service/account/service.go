@@ -12,7 +12,7 @@ const (
 )
 
 type ISAccount interface {
-	CreateUserAccount(ctx context.Context, param CreateUserParam) (RegisterUserDetail, error)
+	CreateUserAccount(ctx context.Context, param CreateCostumerParam) (RegisterCostumerDetail, error)
 }
 
 type Service struct {
