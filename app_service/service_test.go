@@ -16,11 +16,6 @@ import (
 )
 
 // param Seeder for unit testing
-var (
-	AccountRegistered account.RegisterUserDetail
-	CompanyRegistered company.RegisteredCompanyDetail
-)
-
 func getRepository(ctx context.Context) (database.IRepository, error) {
 	env := config.Environment{
 		DBDriver: "postgres",
@@ -74,7 +69,7 @@ func TestUserAccount(t *testing.T) {
 	register := getRegisterClientParam(accountType.ID)
 
 	for _, v := range register {
-		AccountRegistered, err = svc.CreateCustomerAccount(ctx, v)
+		_, err = svc.CreateCustomerAccount(ctx, v)
 		assert.Nil(t, err, "error create account")
 	}
 }
@@ -90,7 +85,7 @@ func TestCreateCompany(t *testing.T) {
 
 	svc := company.New(repos)
 	for _, v := range register {
-		CompanyRegistered, err = svc.CreateCompanyAccount(ctx, v)
+		_, err = svc.CreateCompanyAccount(ctx, v)
 		assert.Nil(t, err)
 	}
 }
@@ -111,7 +106,7 @@ func TestVirtualaccount(t *testing.T) {
 	_, err = svc.Register(ctx, uuid.New(), "http://kon.trol")
 	assert.Error(t, err)
 	for _, v := range ca {
-		_, err = svc.Register(ctx, v.CompanyID, "http://"+util.RandString(8))
+		_, err := svc.Register(ctx, v.CompanyID, "http://"+util.RandString(8))
 		assert.Nil(t, err, err)
 	}
 }
