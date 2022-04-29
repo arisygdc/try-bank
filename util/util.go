@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// strTime layout: yyyy-mm-dd
 func StrToTime(strTime string) (time.Time, error) {
 	return time.Parse("2006-1-2", strings.Trim(strTime, " "))
 }
