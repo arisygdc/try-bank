@@ -46,7 +46,7 @@ type Repository struct {
 	query   *postgresql.Queries
 }
 
-func NewRepository(env config.Environment, ctx context.Context) (IRepository, error) {
+func NewRepository(env config.Environment) (IRepository, error) {
 	if env.DBDriver == PostgreDriver {
 		createSqlconn, err := sql.Open(env.DBDriver, env.DBSource)
 		if err != nil {

@@ -22,7 +22,7 @@ func getRepository(ctx context.Context) (database.IRepository, error) {
 		DBSource: "postgresql://postgresTest:secret@localhost:5432/bank?sslmode=disable",
 	}
 
-	return database.NewRepository(env, ctx)
+	return database.NewRepository(env)
 
 }
 
