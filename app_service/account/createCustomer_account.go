@@ -23,6 +23,11 @@ type RegisterCostumerDetail struct {
 	RegisteredNumber   int32
 }
 
+// create customer account is collection of inserting in table customer, auth_info, wallet, and account
+// then provide inserted cusotmer information and error
+
+// AccountType uuid can be filled by account.GetAccountType()
+// use util.StrToTime() to validate birth
 func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateCostumerParam) (RegisterCostumerDetail, error) {
 	var detailCostumer = RegisterCostumerDetail{}
 
