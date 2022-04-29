@@ -1,9 +1,10 @@
 package server
 
-// TODO
+const apiV1Path = "api/v1"
 
-func (s *Server) ApiRoute() {
-	r := s.engine.Group("api/v1")
+func (s *Server) ApiV1Route() {
+	r := s.engine.Group(apiV1Path)
+
 	// customer route
 	r.POST("/customer", s.controller.Account.Register)
 	r.POST("/transfer", s.DController.Transfer)

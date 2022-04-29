@@ -8,26 +8,23 @@ import (
 )
 
 type Server struct {
-	env        config.Environment
-	engine     *gin.Engine
-	controller controller.DeprecatedController
+	env         config.Environment
+	engine      *gin.Engine
+	controller  controller.BaseController
+	DController controller.DeprecatedController
 }
 
-func NewServer(env config.Environment, ctr controller.DeprecatedController) *Server {
-	engine := gin.Default()
+func NewServer(env config.Environment, ctr controller.BaseController, DC controller.DeprecatedController) *Server {
 	gin.SetMode(env.Environment)
+	engine := gin.Default()
 	server := &Server{
-		env:        env,
-		engine:     engine,
-		controller: ctr,
+		env:         env,
+		engine:      engine,
+		controller:  ctr,
+		DController: DC,
 	}
 
 	return server
-}
-
-func (s *Server) WebRouteCustomConfig() {
-	s.engine.Delims("{{", "}}")
-	s.engine.LoadHTMLGlob("public/views")
 }
 
 func (s Server) Run() {

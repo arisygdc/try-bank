@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	appservice "try-bank/app_service"
 	"try-bank/config"
 	"try-bank/controller"
 	"try-bank/database"
@@ -18,16 +19,20 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// deprecated repository
+	// deprecated
 	repo, err := database.NewRepo(env)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	deprecatedCtr := controller.New(repo)
 
-	// deprecated controller
-	ctr := controller.New(repo)
-
-	server := server.NewServer(env, ctr)
-	server.ApiRoute()
+	repository, err := database.NewRepository(env)
+	if err != nil {
+		log.Fatal(err)
+	}
+	svc := appservice.NewService(repository)
+	ctr := controller.NewController(svc)
+	server := server.NewServer(env, ctr, deprecatedCtr)
+	server.ApiV1Route()
 	server.Run()
 }
