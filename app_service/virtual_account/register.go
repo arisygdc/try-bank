@@ -3,6 +3,7 @@ package virtualaccount
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"math/big"
 	"try-bank/database/postgresql"
 
@@ -17,18 +18,45 @@ type RegistertrationVirtualAccountDetail struct {
 
 func (svc Service) Register(ctx context.Context, company_id uuid.UUID, callback_url string) (RegistertrationVirtualAccountDetail, error) {
 	var outputDetail RegistertrationVirtualAccountDetail
+	id := uuid.New()
 
-	virtualAccountParam := virtualAccount_param(callback_url)
+	random, _ := rand.Int(rand.Reader, big.NewInt(999))
 
-	setCompanyVaParam := setCompanyVa_param(company_id, virtualAccountParam.ID)
+	identity := int32(random.Int64())
+
+	authKey := uuid.NewSHA1(id, random.FillBytes(random.Bytes()))
+
+	virtualAccountParam := postgresql.CreateVirtualAccountParams{
+		ID:               id,
+		Identity:         identity,
+		AuthorizationKey: authKey.String(),
+		CallbackUrl:      callback_url,
+	}
+
+	setCompanyVaParam := postgresql.ActivateVirtualAccountParams{
+		CompanyID: company_id,
+		VirtualAccountID: uuid.NullUUID{
+			UUID:  virtualAccountParam.ID,
+			Valid: true,
+		},
+	}
 
 	err := svc.repos.QueryTx(ctx, func(q *postgresql.Queries) error {
-		err := q.SetCompanyVA(ctx, setCompanyVaParam)
+		err := q.CreateVirtualAccount(ctx, virtualAccountParam)
 		if err != nil {
 			return err
 		}
-		err = q.CreateVirtualAccount(ctx, virtualAccountParam)
-		return err
+
+		rowUpdated, err := q.ActivateVirtualAccount(ctx, setCompanyVaParam)
+		if err != nil {
+			return err
+		}
+
+		if rowUpdated < 1 {
+			return errors.New("no rows updated")
+		}
+
+		return nil
 	})
 
 	if err != nil {
@@ -42,31 +70,4 @@ func (svc Service) Register(ctx context.Context, company_id uuid.UUID, callback_
 	}
 
 	return outputDetail, err
-}
-
-func virtualAccount_param(callback_url string) postgresql.CreateVirtualAccountParams {
-	id := uuid.New()
-
-	random, _ := rand.Int(rand.Reader, big.NewInt(999))
-
-	identity := int32(random.Int64())
-
-	authKey := uuid.NewSHA1(id, random.FillBytes(random.Bytes()))
-
-	return postgresql.CreateVirtualAccountParams{
-		ID:               id,
-		Identity:         identity,
-		AuthorizationKey: authKey.String(),
-		CallbackUrl:      callback_url,
-	}
-}
-
-func setCompanyVa_param(company_id uuid.UUID, virtualAccount_id uuid.UUID) postgresql.SetCompanyVAParams {
-	return postgresql.SetCompanyVAParams{
-		ID: company_id,
-		VirtualAccountID: uuid.NullUUID{
-			UUID:  virtualAccount_id,
-			Valid: true,
-		},
-	}
 }
