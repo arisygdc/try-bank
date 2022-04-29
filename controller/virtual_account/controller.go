@@ -8,6 +8,7 @@ import (
 
 type ICtrVirtualAccount interface {
 	Register(ctx *gin.Context)
+	VirtualAccount_pay(ctx *gin.Context)
 }
 
 type VirtualAccountController struct {
