@@ -11,6 +11,23 @@ import (
 	"github.com/google/uuid"
 )
 
+const activateVirtualAccount = `-- name: ActivateVirtualAccount :execrows
+UPDATE companies_account SET virtual_account_id = $1 WHERE company_id = $2
+`
+
+type ActivateVirtualAccountParams struct {
+	VirtualAccountID uuid.NullUUID `json:"virtual_account_id"`
+	CompanyID        uuid.UUID     `json:"company_id"`
+}
+
+func (q *Queries) ActivateVirtualAccount(ctx context.Context, arg ActivateVirtualAccountParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, activateVirtualAccount, arg.VirtualAccountID, arg.CompanyID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const checkIssuedPaymentVA = `-- name: CheckIssuedPaymentVA :one
 SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2
 `
@@ -31,6 +48,27 @@ func (q *Queries) CheckIssuedPaymentVA(ctx context.Context, arg CheckIssuedPayme
 		&i.IssuedAt,
 	)
 	return i, err
+}
+
+const createVirtualAccount = `-- name: CreateVirtualAccount :exec
+INSERT INTO virtual_account (id, authorization_key, identity, callback_url, created_at) VALUES ($1, $2, $3, $4, DEFAULT)
+`
+
+type CreateVirtualAccountParams struct {
+	ID               uuid.UUID `json:"id"`
+	AuthorizationKey string    `json:"authorization_key"`
+	Identity         int32     `json:"identity"`
+	CallbackUrl      string    `json:"callback_url"`
+}
+
+func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAccountParams) error {
+	_, err := q.db.ExecContext(ctx, createVirtualAccount,
+		arg.ID,
+		arg.AuthorizationKey,
+		arg.Identity,
+		arg.CallbackUrl,
+	)
+	return err
 }
 
 const issuePaymentVA = `-- name: IssuePaymentVA :exec

@@ -96,41 +96,6 @@ func (q *Queries) CreateVAPayment(ctx context.Context, arg CreateVAPaymentParams
 	return err
 }
 
-const createVirtualAccount = `-- name: CreateVirtualAccount :exec
-INSERT INTO virtual_account (id, authorization_key, identity, callback_url, created_at) VALUES ($1, $2, $3, $4, DEFAULT)
-`
-
-type CreateVirtualAccountParams struct {
-	ID               uuid.UUID `json:"id"`
-	AuthorizationKey string    `json:"authorization_key"`
-	Identity         int32     `json:"identity"`
-	CallbackUrl      string    `json:"callback_url"`
-}
-
-func (q *Queries) CreateVirtualAccount(ctx context.Context, arg CreateVirtualAccountParams) error {
-	_, err := q.db.ExecContext(ctx, createVirtualAccount,
-		arg.ID,
-		arg.AuthorizationKey,
-		arg.Identity,
-		arg.CallbackUrl,
-	)
-	return err
-}
-
-const setCompanyVA = `-- name: SetCompanyVA :exec
-UPDATE companies_account SET virtual_account_id = $1 WHERE id = $2
-`
-
-type SetCompanyVAParams struct {
-	VirtualAccountID uuid.NullUUID `json:"virtual_account_id"`
-	ID               uuid.UUID     `json:"id"`
-}
-
-func (q *Queries) SetCompanyVA(ctx context.Context, arg SetCompanyVAParams) error {
-	_, err := q.db.ExecContext(ctx, setCompanyVA, arg.VirtualAccountID, arg.ID)
-	return err
-}
-
 const validateCompany = `-- name: ValidateCompany :one
 SELECT ca.id FROM companies_account ca 
 RIGHT JOIN companies c ON ca.company = c.id 

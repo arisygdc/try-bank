@@ -4,12 +4,6 @@ INSERT INTO companies (id, name, email, phone, created_at) VALUES ($1, $2, $3, $
 -- name: CreateCompanyAccount :exec
 INSERT INTO companies_account (id, company_id, auth_info_id, wallet_id, virtual_account_id) VALUES ($1, $2, $3, $4, $5);
 
--- name: CreateVirtualAccount :exec
-INSERT INTO virtual_account (id, authorization_key, identity, callback_url, created_at) VALUES ($1, $2, $3, $4, DEFAULT);
-
--- name: SetCompanyVA :exec
-UPDATE companies_account SET virtual_account_id = $1 WHERE id = $2;
-
 -- name: CreateVAPayment :exec
 INSERT INTO va_payment (id, issued_payment_id, paid_at) VALUES ($1, $2, DEFAULT);
 
