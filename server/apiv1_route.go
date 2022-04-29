@@ -13,6 +13,8 @@ func (s *Server) ApiV1Route() {
 	r.POST("/company", s.controller.Company.RegisterCompany)
 
 	// virtual account route
-	r.POST("/virtual-account", s.DController.ActivateVA)
-	r.POST("/virtual-account/payment", s.DController.PaymentVA)
+	// TODO
+	// refund, get payment status
+	r.POST("/virtual-account", s.controller.VirtualAccount.Register)
+	r.POST("/virtual-account/payment", s.controller.VirtualAccount.VirtualAccount_pay)
 }
