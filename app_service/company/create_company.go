@@ -7,18 +7,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type PublicInfo_comp struct {
+type PublicInfo_company struct {
 	Name, Email, Phone string
 }
 
+// PublicInfo_company contains string of Name, Email, Phone
 type RegisterCompanyParam struct {
-	PublicInfo_comp
+	PublicInfo_company
 	Pin     string
 	Deposit float64
 }
 
 type RegisteredCompanyDetail struct {
-	PublicInfo_comp
+	PublicInfo_company
 	Deposit        float64
 	RegisterNumber int32
 }
