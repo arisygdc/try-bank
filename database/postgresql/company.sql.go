@@ -11,6 +11,33 @@ import (
 	"github.com/google/uuid"
 )
 
+const authGetCompaniesAccount = `-- name: AuthGetCompaniesAccount :one
+SELECT company_id, auth_info_id, wallet_id, virtual_account_id
+FROM companies_account ca 
+LEFT JOIN auth_info ai 
+ON ai.id = ca.auth_info_id 
+WHERE ai.registered_number = $1
+`
+
+type AuthGetCompaniesAccountRow struct {
+	CompanyID        uuid.UUID     `json:"company_id"`
+	AuthInfoID       uuid.UUID     `json:"auth_info_id"`
+	WalletID         uuid.UUID     `json:"wallet_id"`
+	VirtualAccountID uuid.NullUUID `json:"virtual_account_id"`
+}
+
+func (q *Queries) AuthGetCompaniesAccount(ctx context.Context, registeredNumber int32) (AuthGetCompaniesAccountRow, error) {
+	row := q.db.QueryRowContext(ctx, authGetCompaniesAccount, registeredNumber)
+	var i AuthGetCompaniesAccountRow
+	err := row.Scan(
+		&i.CompanyID,
+		&i.AuthInfoID,
+		&i.WalletID,
+		&i.VirtualAccountID,
+	)
+	return i, err
+}
+
 const createCompany = `-- name: CreateCompany :exec
 INSERT INTO companies (id, name, email, phone, created_at) VALUES ($1, $2, $3, $4, DEFAULT)
 `

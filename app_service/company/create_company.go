@@ -7,16 +7,27 @@ import (
 	"github.com/google/uuid"
 )
 
+type PublicInfo_comp struct {
+	Name, Email, Phone string
+}
+
 type RegisterCompanyParam struct {
-	Name, Email, Phone, Pin string
-	Deposit                 float64
+	PublicInfo_comp
+	Pin     string
+	Deposit float64
 }
 
 type RegisteredCompanyDetail struct {
-	Name, Email, Phone                                string
-	Deposit                                           float64
-	RegisterNumber                                    int32
-	IdCompany, IdAuthInfo, IdWallet, IdCompanyAccount string
+	PublicInfo_comp
+	Deposit        float64
+	RegisterNumber int32
+}
+
+type CompaniesAccount struct {
+	CompanyID        uuid.UUID
+	AuthInfoID       uuid.UUID
+	WalletID         uuid.UUID
+	VirtualAccountID uuid.NullUUID
 }
 
 func (svc Service) CreateCompanyAccount(ctx context.Context, param RegisterCompanyParam) (RegisteredCompanyDetail, error) {
@@ -78,9 +89,10 @@ func (svc Service) CreateCompanyAccount(ctx context.Context, param RegisterCompa
 	registered.Email = company.Email
 	registered.Phone = company.Phone
 	registered.Deposit = wallet.Balance
-	registered.IdCompany = company.ID.String()
-	registered.IdAuthInfo = auth_info.ID.String()
-	registered.IdWallet = wallet.ID.String()
-	registered.IdCompanyAccount = companyAccount.ID.String()
 	return registered, err
+}
+
+func (svc Service) CompanyID(ctx context.Context, regNum_comp int32) (CompaniesAccount, error) {
+	ca, err := svc.repos.Query().AuthGetCompaniesAccount(ctx, regNum_comp)
+	return CompaniesAccount(ca), err
 }
