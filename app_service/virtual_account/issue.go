@@ -16,11 +16,9 @@ type IssueVAPayment struct {
 }
 
 type IssuedPayment struct {
-	ID                   uuid.UUID
-	VirtualAccountID     uuid.UUID
-	VirtualAccountNumber int32
-	PaymentCharge        float64
-	IssuedAt             time.Time
+	ID uuid.UUID
+	IssueVAPayment
+	IssuedAt time.Time
 }
 
 func (svc Service) IssueVAPayment(ctx context.Context, param IssueVAPayment) error {
@@ -32,10 +30,10 @@ func (svc Service) IssueVAPayment(ctx context.Context, param IssueVAPayment) err
 	})
 }
 
-func (svc Service) CheckIssuedVAPayment(ctx context.Context, virtualAccount_id uuid.UUID, virtualAccount_number int32, amount float64) (IssuedPayment, error) {
+func (svc Service) CheckIssuedVAPayment(ctx context.Context, param IssueVAPayment) (IssuedPayment, error) {
 	issuedPaymentParam := postgresql.CheckIssuedPaymentVAParams{
-		VirtualAccountID:     virtualAccount_id,
-		VirtualAccountNumber: virtualAccount_number,
+		VirtualAccountID:     param.Virtual_account_id,
+		VirtualAccountNumber: param.Virtual_account_number,
 	}
 
 	issuedPayment, err := svc.repos.Query().CheckIssuedPaymentVA(ctx, issuedPaymentParam)
@@ -43,9 +41,17 @@ func (svc Service) CheckIssuedVAPayment(ctx context.Context, virtualAccount_id u
 		return IssuedPayment{}, err
 	}
 
-	if issuedPayment.PaymentCharge != amount {
+	if issuedPayment.PaymentCharge != param.Payment_charge {
 		return IssuedPayment{}, errors.New("the amount paid does not match")
 	}
 
-	return IssuedPayment(issuedPayment), nil
+	return IssuedPayment{
+		ID: issuedPayment.ID,
+		IssueVAPayment: IssueVAPayment{
+			Virtual_account_id:     issuedPayment.VirtualAccountID,
+			Virtual_account_number: issuedPayment.VirtualAccountNumber,
+			Payment_charge:         issuedPayment.PaymentCharge,
+		},
+		IssuedAt: issuedPayment.IssuedAt,
+	}, nil
 }
