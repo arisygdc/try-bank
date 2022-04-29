@@ -12,14 +12,15 @@ const (
 )
 
 type ISAccount interface {
-	CreateUserAccount(ctx context.Context, param CreateCostumerParam) (RegisterCostumerDetail, error)
+	CreateCustomerAccount(ctx context.Context, param CreateCostumerParam) (RegisterCostumerDetail, error)
+	GetAccountType(ctx context.Context, name_level string) (AccountType, error)
 }
 
 type Service struct {
 	repos database.IRepository
 }
 
-func New(repository database.IRepository) Service {
+func New(repository database.IRepository) ISAccount {
 	return Service{
 		repos: repository,
 	}

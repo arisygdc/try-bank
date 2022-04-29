@@ -6,10 +6,10 @@ type ICtrCompany interface {
 }
 
 type CompanyController struct {
-	service appservice.ISBase
+	service appservice.BaseService
 }
 
-func New(service appservice.ISBase) ICtrCompany {
+func New(service appservice.BaseService) ICtrCompany {
 	return CompanyController{
 		service: service,
 	}

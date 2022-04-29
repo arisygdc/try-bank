@@ -11,10 +11,10 @@ type ICtrVirtualAccount interface {
 }
 
 type VirtualAccountController struct {
-	service appservice.ISBase
+	service appservice.BaseService
 }
 
-func New(service appservice.ISBase) ICtrVirtualAccount {
+func New(service appservice.BaseService) ICtrVirtualAccount {
 	return VirtualAccountController{
 		service: service,
 	}

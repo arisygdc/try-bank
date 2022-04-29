@@ -16,7 +16,7 @@ type BaseController struct {
 	VirtualAccount virtualaccount.ICtrVirtualAccount
 }
 
-func NewController(service appservice.ISBase) ICtrBase {
+func NewController(service appservice.BaseService) ICtrBase {
 	return BaseController{
 		Account:        account.New(service),
 		Company:        company.New(service),

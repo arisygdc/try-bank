@@ -6,10 +6,10 @@ type ICtrAccount interface {
 }
 
 type AccountController struct {
-	service appservice.ISBase
+	service appservice.BaseService
 }
 
-func New(service appservice.ISBase) ICtrAccount {
+func New(service appservice.BaseService) ICtrAccount {
 	return AccountController{
 		service: service,
 	}
