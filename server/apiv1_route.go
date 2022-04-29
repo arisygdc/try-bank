@@ -6,8 +6,9 @@ func (s *Server) ApiV1Route() {
 	r := s.engine.Group(apiV1Path)
 
 	// customer route
+	// TODO
+	// transfer
 	r.POST("/customer", s.controller.Account.Register)
-	r.POST("/transfer", s.DController.Transfer)
 
 	// company route
 	r.POST("/company", s.controller.Company.RegisterCompany)

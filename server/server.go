@@ -8,20 +8,18 @@ import (
 )
 
 type Server struct {
-	env         config.Environment
-	engine      *gin.Engine
-	controller  controller.BaseController
-	DController controller.DeprecatedController
+	env        config.Environment
+	engine     *gin.Engine
+	controller controller.BaseController
 }
 
-func NewServer(env config.Environment, ctr controller.BaseController, DC controller.DeprecatedController) *Server {
+func NewServer(env config.Environment, ctr controller.BaseController) *Server {
 	gin.SetMode(env.Environment)
 	engine := gin.Default()
 	server := &Server{
-		env:         env,
-		engine:      engine,
-		controller:  ctr,
-		DController: DC,
+		env:        env,
+		engine:     engine,
+		controller: ctr,
 	}
 
 	return server
