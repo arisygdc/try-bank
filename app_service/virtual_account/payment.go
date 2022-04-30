@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"try-bank/database/postgresql"
 
 	"github.com/google/uuid"
 )
@@ -14,10 +15,52 @@ type PaidVA struct {
 	PaidAt          time.Time
 }
 
+type PayVA struct {
+	IssuedPayment       uuid.UUID
+	PayerWallet         uuid.UUID
+	VirtualAccountOwner uuid.UUID
+	PaymentCharge       float64
+}
+
 // TODO
-// use transaction to subtract payer wallet and increase company wallet
 // notify company using callback_url
-func (svc Service) PaymentVirtualAccount(ctx context.Context, IssuedPayment_id uuid.UUID) (PaidVA, error) {
-	paid, _ := svc.repos.Query().PaymentVA(ctx, IssuedPayment_id)
-	return PaidVA(paid), errors.New("<- todo")
+func (svc Service) PaymentVirtualAccount(ctx context.Context, param PayVA) (PaidVA, error) {
+	var paid PaidVA
+	err := svc.repos.QueryTx(ctx, func(q *postgresql.Queries) error {
+		payment, err := q.PaymentVA(ctx, param.IssuedPayment)
+		if err != nil {
+			return err
+		}
+
+		changes, err := q.SubtractBalance(ctx, postgresql.SubtractBalanceParams{
+			ID:      param.PayerWallet,
+			Balance: param.PaymentCharge,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if changes < 1 {
+			return errors.New("no rows changed")
+		}
+
+		changes, err = q.AddBalance(ctx, postgresql.AddBalanceParams{
+			ID:      param.VirtualAccountOwner,
+			Balance: param.PaymentCharge,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if changes < 1 {
+			return errors.New("no rows changed")
+		}
+
+		paid = PaidVA(payment)
+		return nil
+	})
+
+	return paid, err
 }

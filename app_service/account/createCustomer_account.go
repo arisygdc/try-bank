@@ -23,6 +23,13 @@ type RegisterCostumerDetail struct {
 	RegisteredNumber   int32
 }
 
+type CustomerAccount struct {
+	CutomerID     uuid.UUID
+	AuthInfoID    uuid.UUID
+	WalletID      uuid.UUID
+	AccountTypeID uuid.UUID
+}
+
 // create customer account is collection of inserting in table customer, auth_info, wallet, and account
 // then provide inserted cusotmer information and error
 
@@ -91,4 +98,9 @@ func (svc Service) CreateCustomerAccount(ctx context.Context, param CreateCostum
 	detailCostumer.Phone = param.Phone
 
 	return detailCostumer, err
+}
+
+func (svc Service) CustomerAccount(ctx context.Context, regNum_comp int32) (CustomerAccount, error) {
+	ca, err := svc.repos.Query().AuthGetCustomerAccount(ctx, regNum_comp)
+	return CustomerAccount(ca), err
 }

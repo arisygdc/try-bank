@@ -23,24 +23,41 @@ func (ctr VirtualAccountController) VirtualAccount_pay(ctx *gin.Context) {
 		return
 	}
 
-	vaID, err := ctr.service.VirtualAccount.VirtualAccountID(ctx, 3)
+	va_identity, va_number, err := ctr.service.VirtualAccount.ValidateVirtualAccount(req.VirtualAccount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	issuedPayment, err := ctr.service.VirtualAccount.CheckIssuedVAPayment(ctx, virtualaccount.IssueVAPayment{
-		Virtual_account_id:     vaID,
-		Virtual_account_number: req.Payer,
+	payerAccount, err := ctr.service.Account.CustomerAccount(ctx, req.Payer)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	ca, err := ctr.service.VirtualAccount.VirtualAccountGetCompany(ctx, int32(va_identity))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	issuedPaymentParam := virtualaccount.IssueVAPayment{
+		Virtual_account_id:     ca.VirtualAccountID,
+		Virtual_account_number: int32(va_number),
 		Payment_charge:         700000,
+	}
+
+	issuedPayment, err := ctr.service.VirtualAccount.CheckIssuedVAPayment(ctx, issuedPaymentParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	paid, err := ctr.service.VirtualAccount.PaymentVirtualAccount(ctx, virtualaccount.PayVA{
+		IssuedPayment: issuedPayment.ID,
+		PayerWallet:   payerAccount.WalletID,
 	})
 
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
-		return
-	}
-
-	paid, err := ctr.service.VirtualAccount.PaymentVirtualAccount(ctx, issuedPayment.ID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return

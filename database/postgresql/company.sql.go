@@ -96,6 +96,33 @@ func (q *Queries) CreateVAPayment(ctx context.Context, arg CreateVAPaymentParams
 	return err
 }
 
+const vAGetCompaniesAccount = `-- name: VAGetCompaniesAccount :one
+SELECT company_id, auth_info_id, wallet_id, virtual_account_id
+FROM companies_account ca 
+LEFT JOIN virtual_account va 
+ON va.id = ca.virtual_account_id 
+WHERE va.identity = $1
+`
+
+type VAGetCompaniesAccountRow struct {
+	CompanyID        uuid.UUID     `json:"company_id"`
+	AuthInfoID       uuid.UUID     `json:"auth_info_id"`
+	WalletID         uuid.UUID     `json:"wallet_id"`
+	VirtualAccountID uuid.NullUUID `json:"virtual_account_id"`
+}
+
+func (q *Queries) VAGetCompaniesAccount(ctx context.Context, identity int32) (VAGetCompaniesAccountRow, error) {
+	row := q.db.QueryRowContext(ctx, vAGetCompaniesAccount, identity)
+	var i VAGetCompaniesAccountRow
+	err := row.Scan(
+		&i.CompanyID,
+		&i.AuthInfoID,
+		&i.WalletID,
+		&i.VirtualAccountID,
+	)
+	return i, err
+}
+
 const validateCompany = `-- name: ValidateCompany :one
 SELECT ca.id FROM companies_account ca 
 RIGHT JOIN companies c ON ca.company = c.id 
