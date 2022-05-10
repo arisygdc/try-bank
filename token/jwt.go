@@ -40,13 +40,13 @@ func (t JWToken) Verify(token string) (*Payload, error) {
 		return []byte(t.secretKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc, jwt.WithoutClaimsValidation())
+	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	payload, ok := jwtToken.Claims.(*Payload)
-	if ok {
+	if !ok {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
 

@@ -12,7 +12,6 @@ type Payload struct {
 	Registered_number int32     `json:"registered_numer"`
 	Issued_at         time.Time `json:"issued_at"`
 	Expired_at        time.Time `json:"expired_at"`
-	jwt.StandardClaims
 }
 
 func Newpayload(RegisteredNumber int32, tokenDuration time.Duration) *Payload {
@@ -26,8 +25,8 @@ func Newpayload(RegisteredNumber int32, tokenDuration time.Duration) *Payload {
 }
 
 func (pld *Payload) Valid() error {
-	// if time.Now().After(pld.Expired_at) {
-	// 	return jwt.ErrTokenExpired
-	// }
+	if time.Now().After(pld.Expired_at) {
+		return jwt.ErrTokenExpired
+	}
 	return nil
 }
