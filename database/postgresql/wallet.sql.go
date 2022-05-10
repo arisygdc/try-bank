@@ -44,3 +44,24 @@ func (q *Queries) SubtractBalance(ctx context.Context, arg SubtractBalanceParams
 	}
 	return result.RowsAffected()
 }
+
+const transfer = `-- name: Transfer :exec
+INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfered_at) VALUES ($1, $2, $3, $4, DEFAULT)
+`
+
+type TransferParams struct {
+	ID         uuid.UUID `json:"id"`
+	FromWallet uuid.UUID `json:"from_wallet"`
+	ToWallet   uuid.UUID `json:"to_wallet"`
+	Balance    float64   `json:"balance"`
+}
+
+func (q *Queries) Transfer(ctx context.Context, arg TransferParams) error {
+	_, err := q.db.ExecContext(ctx, transfer,
+		arg.ID,
+		arg.FromWallet,
+		arg.ToWallet,
+		arg.Balance,
+	)
+	return err
+}
