@@ -9,6 +9,39 @@ import (
 	"context"
 )
 
+const testGetAllAccount = `-- name: TestGetAllAccount :many
+SELECT id, cutomer_id, auth_info_id, wallet_id, account_type_id FROM accounts
+`
+
+func (q *Queries) TestGetAllAccount(ctx context.Context) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, testGetAllAccount)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.CutomerID,
+			&i.AuthInfoID,
+			&i.WalletID,
+			&i.AccountTypeID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const testGetAllCompaniesAccount = `-- name: TestGetAllCompaniesAccount :many
 SELECT id, company_id, auth_info_id, wallet_id, virtual_account_id FROM companies_account
 `

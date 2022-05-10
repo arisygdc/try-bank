@@ -15,6 +15,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO
+// - Implement test table
+
 // param Seeder for unit testing
 func getRepository(ctx context.Context) (database.IRepository, error) {
 	env := config.Environment{
@@ -29,11 +32,30 @@ func getRepository(ctx context.Context) (database.IRepository, error) {
 func getRegisterClientParam(accountType_id uuid.UUID) []account.CreateCostumerParam {
 	return []account.CreateCostumerParam{
 		{
-			Firstname:   "arisy",
-			Lastname:    "musyafa'",
-			Email:       "arisy@gdc.com",
-			Phone:       "081217827013",
+			Firstname:   "si",
+			Lastname:    "pitung'",
+			Email:       "si@pitung.com",
+			Phone:       "081217843623",
 			Pin:         "025361",
+			TopUp:       1000000,
+			Birth:       time.Now(),
+			AccountType: accountType_id,
+		}, {
+			Firstname:   "si",
+			Lastname:    "gatel'",
+			Email:       "si@gatel.com",
+			Phone:       "0812132435346",
+			Pin:         "025361",
+			TopUp:       1000000,
+			Birth:       time.Now(),
+			AccountType: accountType_id,
+		}, {
+			Firstname:   "mbak",
+			Lastname:    "yeyen'",
+			Email:       "mbakyeyen@gatel.com",
+			Phone:       "0812132433436",
+			Pin:         "025361",
+			TopUp:       1000000,
 			Birth:       time.Now(),
 			AccountType: accountType_id,
 		},
@@ -108,5 +130,23 @@ func TestVirtualaccount(t *testing.T) {
 	for _, v := range ca {
 		_, err := svc.Register(ctx, v.CompanyID, "http://"+util.RandString(8))
 		assert.Nil(t, err, err)
+	}
+}
+
+func TestTransfer(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	repo, err := getRepository(ctx)
+
+	assert.Nil(t, err)
+
+	svc := account.New(repo)
+	customers, err := repo.Query().TestGetAllAccount(ctx)
+	assert.Nil(t, err)
+	assert.GreaterOrEqual(t, len(customers), 2)
+	for i := 0; i < len(customers)-1; i++ {
+		err := svc.Transfer(ctx, customers[i].WalletID, customers[i+1].WalletID, float64(10000+i))
+		assert.Nil(t, err)
 	}
 }
