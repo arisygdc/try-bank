@@ -23,5 +23,7 @@ func TestJWToken(t *testing.T) {
 	verifiedPayload, err := tokenMaker.Verify(token)
 	assert.NoError(t, err, err)
 
-	assert.True(t, verifiedPayload.Registered_number == payload.Registered_number, "session id not match")
+	if assert.NotNil(t, verifiedPayload) {
+		assert.True(t, verifiedPayload.Registered_number == payload.Registered_number, "session id not match")
+	}
 }
