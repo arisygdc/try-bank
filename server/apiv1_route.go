@@ -18,6 +18,6 @@ func (s *Server) ApiV1Route(m middleware.Middleware) {
 	// virtual account route
 	// TODO
 	// refund, get payment status
-	r.POST("/virtual-account", s.controller.VirtualAccount.Register)
-	r.POST("/virtual-account/payment", s.controller.VirtualAccount.VirtualAccount_pay)
+	authenticated.POST("/virtual-account", s.controller.VirtualAccount.Register)
+	authenticated.POST("/virtual-account/payment", s.controller.VirtualAccount.VirtualAccount_pay)
 }
