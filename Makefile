@@ -45,8 +45,8 @@ migratedown:
 	migrate -path database/postgresql/migration/ -database "postgresql://${pgUser}:${pgPassword}@localhost:5432/${databaseName}?sslmode=disable" -verbose down
 
 testup:
-	${testDB} && \
-	sleep 3 && \
+	${testDB}
+	sleep 3
 	${testmigrate}
 
 testdown:
