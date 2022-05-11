@@ -1,6 +1,6 @@
 package token
 
 type Token interface {
-	Make()
-	Valid()
+	Make(payload *Payload) (string, error)
+	Verify(token string) (*Payload, error)
 }
