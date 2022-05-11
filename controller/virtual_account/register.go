@@ -2,13 +2,14 @@ package virtualaccount
 
 import (
 	"net/http"
+	"try-bank/server/middleware"
+	"try-bank/token"
 
 	"github.com/gin-gonic/gin"
 )
 
 type RegisterVirtualAccount struct {
-	RegisteredNumber int32  `json:"registered_number" binding:"required"`
-	CallbackURL      string `json:"callback_url" binding:"required"`
+	CallbackURL string `json:"callback_url" binding:"required"`
 }
 
 func (ctr VirtualAccountController) Register(ctx *gin.Context) {
@@ -20,7 +21,19 @@ func (ctr VirtualAccountController) Register(ctx *gin.Context) {
 		return
 	}
 
-	ca, err := ctr.service.Company.CompanyAccount(ctx, req.RegisteredNumber)
+	getPayload, exists := ctx.Get(middleware.PayloadKey)
+	if !exists {
+		ctx.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+
+	payload, ok := getPayload.(*token.Payload)
+	if !ok {
+		ctx.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+
+	ca, err := ctr.service.Company.CompanyAccount(ctx, payload.Registered_number)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
