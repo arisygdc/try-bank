@@ -19,7 +19,6 @@ func TestJWToken(t *testing.T) {
 	token, err := tokenMaker.Make(payload)
 	assert.Nil(t, err)
 
-	// t.Logf("token: %s", token)
 	verifiedPayload, err := tokenMaker.Verify(token)
 	assert.NoError(t, err, err)
 
