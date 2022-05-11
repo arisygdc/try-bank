@@ -1,4 +1,4 @@
-package server
+package middleware
 
 import (
 	"net/http"
@@ -14,7 +14,11 @@ const (
 	PayloadKey       = "userPayload"
 )
 
-func (srv Server) AuthBearer() gin.HandlerFunc {
+type Middleware struct {
+	TokenSymetricKey string
+}
+
+func (m Middleware) AuthBearer() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader(AuthorizationKey)
 
@@ -34,7 +38,7 @@ func (srv Server) AuthBearer() gin.HandlerFunc {
 			return
 		}
 
-		tokenProvider, err := token.NewJWT(srv.env.TokenSymetricKey)
+		tokenProvider, err := token.NewJWT(m.TokenSymetricKey)
 		if err == token.ErrSecretKeyLeng {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 			return
