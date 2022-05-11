@@ -23,7 +23,7 @@ func RandString(leng int) string {
 	return string(str)
 }
 
-func RandNum(max *big.Int) int64 {
-	n, _ := crptRand.Int(crptRand.Reader, max)
+func RandNum(max int64) int64 {
+	n, _ := crptRand.Int(crptRand.Reader, big.NewInt(max))
 	return n.Int64()
 }

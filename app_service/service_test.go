@@ -162,7 +162,7 @@ func TestVirtualAccountPayment(t *testing.T) {
 	}
 
 	company = ca[0]
-	vaNumb := int32(288029)
+	vaNumb := int32(util.RandNum(99999))
 
 	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
 		Virtual_account_id:     company.VirtualAccountID.UUID,
@@ -171,6 +171,7 @@ func TestVirtualAccountPayment(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
+	// Repeating issue
 	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
 		Virtual_account_id:     company.VirtualAccountID.UUID,
 		Virtual_account_number: vaNumb,
