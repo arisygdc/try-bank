@@ -28,17 +28,21 @@ func (q *Queries) ActivateVirtualAccount(ctx context.Context, arg ActivateVirtua
 	return result.RowsAffected()
 }
 
-const checkIssuedPaymentVA = `-- name: CheckIssuedPaymentVA :one
-SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2
+const checkActiveIssueVAP = `-- name: CheckActiveIssueVAP :one
+SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment 
+WHERE virtual_account_id = $1
+AND virtual_account_number = $2
+AND issued_at + INTERVAL '1 day' > NOW()
+AND id NOT IN (SELECT issued_payment_id FROM va_payment)
 `
 
-type CheckIssuedPaymentVAParams struct {
+type CheckActiveIssueVAPParams struct {
 	VirtualAccountID     uuid.UUID `json:"virtual_account_id"`
 	VirtualAccountNumber int32     `json:"virtual_account_number"`
 }
 
-func (q *Queries) CheckIssuedPaymentVA(ctx context.Context, arg CheckIssuedPaymentVAParams) (IssuedPayment, error) {
-	row := q.db.QueryRowContext(ctx, checkIssuedPaymentVA, arg.VirtualAccountID, arg.VirtualAccountNumber)
+func (q *Queries) CheckActiveIssueVAP(ctx context.Context, arg CheckActiveIssueVAPParams) (IssuedPayment, error) {
+	row := q.db.QueryRowContext(ctx, checkActiveIssueVAP, arg.VirtualAccountID, arg.VirtualAccountNumber)
 	var i IssuedPayment
 	err := row.Scan(
 		&i.ID,
