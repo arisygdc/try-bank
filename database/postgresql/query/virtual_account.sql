@@ -14,4 +14,4 @@ SELECT id FROM virtual_account WHERE identity = $1;
 SELECT * FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2;
 
 -- name: PaymentVA :one
-INSERT INTO va_payment (issued_payment_id) VALUES ($1) RETURNING *;
+INSERT INTO va_payment (id, issued_payment_id) VALUES ($1, $2) RETURNING *;

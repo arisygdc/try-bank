@@ -93,11 +93,16 @@ func (q *Queries) IssuePaymentVA(ctx context.Context, arg IssuePaymentVAParams) 
 }
 
 const paymentVA = `-- name: PaymentVA :one
-INSERT INTO va_payment (issued_payment_id) VALUES ($1) RETURNING id, issued_payment_id, paid_at
+INSERT INTO va_payment (id, issued_payment_id) VALUES ($1, $2) RETURNING id, issued_payment_id, paid_at
 `
 
-func (q *Queries) PaymentVA(ctx context.Context, issuedPaymentID uuid.UUID) (VaPayment, error) {
-	row := q.db.QueryRowContext(ctx, paymentVA, issuedPaymentID)
+type PaymentVAParams struct {
+	ID              uuid.UUID `json:"id"`
+	IssuedPaymentID uuid.UUID `json:"issued_payment_id"`
+}
+
+func (q *Queries) PaymentVA(ctx context.Context, arg PaymentVAParams) (VaPayment, error) {
+	row := q.db.QueryRowContext(ctx, paymentVA, arg.ID, arg.IssuedPaymentID)
 	var i VaPayment
 	err := row.Scan(&i.ID, &i.IssuedPaymentID, &i.PaidAt)
 	return i, err
