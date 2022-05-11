@@ -18,6 +18,12 @@ type Middleware struct {
 	TokenSymetricKey string
 }
 
+func NewMiddleware(symetricKey string) Middleware {
+	return Middleware{
+		TokenSymetricKey: symetricKey,
+	}
+}
+
 func (m Middleware) AuthBearer() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader(AuthorizationKey)

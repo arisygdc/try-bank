@@ -1,14 +1,16 @@
 package server
 
+import "try-bank/server/middleware"
+
 const apiV1Path = "api/v1"
 
-func (s *Server) ApiV1Route() {
+func (s *Server) ApiV1Route(m middleware.Middleware) {
 	r := s.engine.Group(apiV1Path)
-
+	authenticated := r.Use(m.AuthBearer())
 	// customer route
 	// TODO
 	r.POST("/customer", s.controller.Account.Register)
-	r.POST("/transfer", s.controller.Account.Transfer)
+	authenticated.POST("/transfer", s.controller.Account.Transfer)
 
 	// company route
 	r.POST("/company", s.controller.Company.RegisterCompany)
