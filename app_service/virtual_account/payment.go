@@ -16,10 +16,10 @@ type PaidVA struct {
 }
 
 type PayVA struct {
-	IssuedPayment       uuid.UUID
-	PayerWallet         uuid.UUID
-	VirtualAccountOwner uuid.UUID
-	PaymentCharge       float64
+	IssuedPayment uuid.UUID
+	PayerWallet   uuid.UUID
+	OwnerVAWallet uuid.UUID
+	PaymentCharge float64
 }
 
 // TODO
@@ -27,7 +27,10 @@ type PayVA struct {
 func (svc Service) PaymentVirtualAccount(ctx context.Context, param PayVA) (PaidVA, error) {
 	var paid PaidVA
 	err := svc.repos.QueryTx(ctx, func(q *postgresql.Queries) error {
-		payment, err := q.PaymentVA(ctx, param.IssuedPayment)
+		payment, err := q.PaymentVA(ctx, postgresql.PaymentVAParams{
+			ID:              uuid.New(),
+			IssuedPaymentID: param.IssuedPayment,
+		})
 		if err != nil {
 			return err
 		}
@@ -46,7 +49,7 @@ func (svc Service) PaymentVirtualAccount(ctx context.Context, param PayVA) (Paid
 		}
 
 		changes, err = q.AddBalance(ctx, postgresql.AddBalanceParams{
-			ID:      param.VirtualAccountOwner,
+			ID:      param.OwnerVAWallet,
 			Balance: param.PaymentCharge,
 		})
 

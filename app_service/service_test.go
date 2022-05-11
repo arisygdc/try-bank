@@ -9,6 +9,7 @@ import (
 	virtualaccount "try-bank/app_service/virtual_account"
 	"try-bank/config"
 	"try-bank/database"
+	"try-bank/database/postgresql"
 	"try-bank/util"
 
 	"github.com/google/uuid"
@@ -131,6 +132,69 @@ func TestVirtualaccount(t *testing.T) {
 		_, err := svc.Register(ctx, v.CompanyID, "http://"+util.RandString(8))
 		assert.Nil(t, err, err)
 	}
+}
+
+func TestVirtualAccountPayment(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	repo, err := getRepository(ctx)
+
+	assert.Nil(t, err)
+
+	svc := virtualaccount.New(repo)
+
+	ca, err := repo.Query().TestGetAllCompaniesAccount(ctx)
+	if !assert.Nil(t, err) && !assert.NotNil(t, ca) {
+		assert.FailNow(t, "no companies registered")
+	}
+
+	users, err := repo.Query().TestGetAllAccount(ctx)
+	if !assert.Nil(t, err) && !assert.NotNil(t, users) {
+		assert.FailNow(t, "no user registered")
+	}
+
+	user := users[0]
+
+	var company postgresql.CompaniesAccount
+	if !ca[0].VirtualAccountID.Valid {
+		assert.FailNow(t, "no virtual account registered")
+	}
+
+	company = ca[0]
+	vaNumb := int32(util.RandNum(99999))
+
+	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
+		Virtual_account_id:     company.VirtualAccountID.UUID,
+		Virtual_account_number: vaNumb,
+		Payment_charge:         40000,
+	})
+	assert.Nil(t, err)
+
+	// Repeating issue
+	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
+		Virtual_account_id:     company.VirtualAccountID.UUID,
+		Virtual_account_number: vaNumb,
+		Payment_charge:         40000,
+	})
+	assert.Error(t, err)
+
+	issued, err := svc.IssuedVAPaymentValidation(ctx, virtualaccount.IssueVAPayment{
+		Virtual_account_id:     company.VirtualAccountID.UUID,
+		Virtual_account_number: vaNumb,
+		Payment_charge:         40000,
+	})
+
+	assert.Nil(t, err)
+	assert.NotNil(t, issued)
+	_, err = svc.PaymentVirtualAccount(ctx, virtualaccount.PayVA{
+		IssuedPayment: issued.ID,
+		OwnerVAWallet: company.WalletID,
+		PayerWallet:   user.WalletID,
+		PaymentCharge: 40000,
+	})
+
+	assert.Nil(t, err)
 }
 
 func TestTransfer(t *testing.T) {

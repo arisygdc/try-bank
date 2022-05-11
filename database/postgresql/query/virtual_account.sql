@@ -10,8 +10,12 @@ INSERT INTO issued_payment (id, virtual_account_id, virtual_account_number, paym
 -- name: VirtualAccountID :one
 SELECT id FROM virtual_account WHERE identity = $1;
 
--- name: CheckIssuedPaymentVA :one
-SELECT * FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2;
-
 -- name: PaymentVA :one
-INSERT INTO va_payment (issued_payment_id) VALUES ($1) RETURNING *;
+INSERT INTO va_payment (id, issued_payment_id) VALUES ($1, $2) RETURNING *;
+
+-- name: CheckActiveIssueVAP :one
+SELECT * FROM issued_payment 
+WHERE virtual_account_id = $1
+AND virtual_account_number = $2
+AND issued_at + INTERVAL '1 day' > NOW()
+AND id NOT IN (SELECT issued_payment_id FROM va_payment);

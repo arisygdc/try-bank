@@ -7,6 +7,7 @@ import (
 	"try-bank/controller"
 	"try-bank/database"
 	"try-bank/server"
+	"try-bank/server/middleware"
 )
 
 const (
@@ -27,6 +28,7 @@ func main() {
 	service := appservice.NewService(repository)
 	controller := controller.NewController(service)
 	server := server.NewServer(env, controller)
-	server.ApiV1Route()
+	mid := middleware.NewMiddleware(env.TokenSymetricKey)
+	server.ApiV1Route(mid)
 	server.Run()
 }

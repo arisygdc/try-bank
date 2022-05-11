@@ -31,6 +31,12 @@ type CompaniesAccount struct {
 	VirtualAccountID uuid.NullUUID
 }
 
+// It will insert companies_account table with relation to company, auth_info, wallet
+// registered number is part of auth_info, created on database.
+// By incrementing one, each row created, with min and max condition
+
+// company have the privilege to make payment request via virtual account
+// to make virtual account payment, company need to activate virtual account
 func (svc Service) CreateCompanyAccount(ctx context.Context, param RegisterCompanyParam) (RegisteredCompanyDetail, error) {
 	var registered = RegisteredCompanyDetail{}
 

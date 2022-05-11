@@ -10,7 +10,7 @@ import (
 type ISVirtualAccount interface {
 	Register(ctx context.Context, company_id uuid.UUID, callback_url string) (RegistertrationVirtualAccountDetail, error)
 	IssueVAPayment(ctx context.Context, param IssueVAPayment) error
-	CheckIssuedVAPayment(ctx context.Context, param IssueVAPayment) (IssuedPayment, error)
+	IssuedVAPaymentValidation(ctx context.Context, param IssueVAPayment) (IssuedPayment, error)
 	ValidateVirtualAccount(virtual_account string) (virtualAccountIdentity, virtualAccountNumber, error)
 	PaymentVirtualAccount(ctx context.Context, param PayVA) (PaidVA, error)
 	VirtualAccountGetCompany(ctx context.Context, va_identity int32) (CompaniesAccount, error)

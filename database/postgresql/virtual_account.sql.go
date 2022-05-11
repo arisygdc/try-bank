@@ -28,17 +28,21 @@ func (q *Queries) ActivateVirtualAccount(ctx context.Context, arg ActivateVirtua
 	return result.RowsAffected()
 }
 
-const checkIssuedPaymentVA = `-- name: CheckIssuedPaymentVA :one
-SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment WHERE virtual_account_id = $1 AND virtual_account_number = $2
+const checkActiveIssueVAP = `-- name: CheckActiveIssueVAP :one
+SELECT id, virtual_account_id, virtual_account_number, payment_charge, issued_at FROM issued_payment 
+WHERE virtual_account_id = $1
+AND virtual_account_number = $2
+AND issued_at + INTERVAL '1 day' > NOW()
+AND id NOT IN (SELECT issued_payment_id FROM va_payment)
 `
 
-type CheckIssuedPaymentVAParams struct {
+type CheckActiveIssueVAPParams struct {
 	VirtualAccountID     uuid.UUID `json:"virtual_account_id"`
 	VirtualAccountNumber int32     `json:"virtual_account_number"`
 }
 
-func (q *Queries) CheckIssuedPaymentVA(ctx context.Context, arg CheckIssuedPaymentVAParams) (IssuedPayment, error) {
-	row := q.db.QueryRowContext(ctx, checkIssuedPaymentVA, arg.VirtualAccountID, arg.VirtualAccountNumber)
+func (q *Queries) CheckActiveIssueVAP(ctx context.Context, arg CheckActiveIssueVAPParams) (IssuedPayment, error) {
+	row := q.db.QueryRowContext(ctx, checkActiveIssueVAP, arg.VirtualAccountID, arg.VirtualAccountNumber)
 	var i IssuedPayment
 	err := row.Scan(
 		&i.ID,
@@ -93,11 +97,16 @@ func (q *Queries) IssuePaymentVA(ctx context.Context, arg IssuePaymentVAParams) 
 }
 
 const paymentVA = `-- name: PaymentVA :one
-INSERT INTO va_payment (issued_payment_id) VALUES ($1) RETURNING id, issued_payment_id, paid_at
+INSERT INTO va_payment (id, issued_payment_id) VALUES ($1, $2) RETURNING id, issued_payment_id, paid_at
 `
 
-func (q *Queries) PaymentVA(ctx context.Context, issuedPaymentID uuid.UUID) (VaPayment, error) {
-	row := q.db.QueryRowContext(ctx, paymentVA, issuedPaymentID)
+type PaymentVAParams struct {
+	ID              uuid.UUID `json:"id"`
+	IssuedPaymentID uuid.UUID `json:"issued_payment_id"`
+}
+
+func (q *Queries) PaymentVA(ctx context.Context, arg PaymentVAParams) (VaPayment, error) {
+	row := q.db.QueryRowContext(ctx, paymentVA, arg.ID, arg.IssuedPaymentID)
 	var i VaPayment
 	err := row.Scan(&i.ID, &i.IssuedPaymentID, &i.PaidAt)
 	return i, err

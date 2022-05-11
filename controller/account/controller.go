@@ -7,6 +7,7 @@ import (
 )
 
 type ICtrAccount interface {
+	Transfer(ctx *gin.Context)
 	Register(ctx *gin.Context)
 }
 
