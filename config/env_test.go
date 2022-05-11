@@ -7,25 +7,11 @@ import (
 )
 
 func TestEnv(t *testing.T) {
-	mp := make(map[string]string)
-	mp["0.0.0.0:8080"] = "server address"
-	mp["postgres"] = "database driver"
-	mp["postgresql://postgres:secret@127.0.0.1:5432/bank?sslmode=disable"] = "database source"
-	mp["debug"] = "environment"
+	env, err := NewEnv("../.", "example.config")
+	assert.NoError(t, err)
 
-	assert := assert.New(t)
-	env, err := NewEnv("../")
-	assert.NoError(err)
-
-	h, ok := mp[env.DBDriver]
-	assert.True(ok, h)
-
-	h, ok = mp[env.DBSource]
-	assert.True(ok, h)
-
-	h, ok = mp[env.Environment]
-	assert.True(ok, h)
-
-	h, ok = mp[env.ServerAddress]
-	assert.True(ok, h)
+	assert.Equal(t, "0.0.0.0:8080", env.ServerAddress)
+	assert.Equal(t, "postgres", env.DBDriver)
+	assert.Equal(t, "postgresql://postgres:secret@localhost:5432/bank?sslmode=disable", env.DBSource)
+	assert.Equal(t, "debug", env.Environment)
 }
