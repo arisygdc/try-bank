@@ -3,10 +3,11 @@ package config
 import "github.com/spf13/viper"
 
 type Environment struct {
-	ServerAddress string `mapstructure:"SERVER_ADDRESSESS"`
-	DBDriver      string `mapstructure:"DB_DRIVER"`
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	Environment   string `mapstructure:"ENVIRONMENT"`
+	ServerAddress    string `mapstructure:"SERVER_ADDRESSESS"`
+	DBDriver         string `mapstructure:"DB_DRIVER"`
+	DBSource         string `mapstructure:"DB_SOURCE"`
+	TokenSymetricKey string `mapstructure:"TOKEN_SYMETRIC_KEY"`
+	Environment      string `mapstructure:"ENVIRONMENT"`
 }
 
 // Supply param for configuration from .env file or environment variable if exists
