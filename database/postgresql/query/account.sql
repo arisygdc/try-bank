@@ -13,15 +13,9 @@ INSERT INTO wallets (id, balance, last_update) VALUES ($1, $2, DEFAULT);
 -- name: CreateAccount :exec
 INSERT INTO accounts (id, cutomer_id, auth_info_id, wallet_id, account_type_id) VALUES ($1, $2, $3, $4, $5);
 
--- name: CreateTransfer :exec
-INSERT INTO transfers (id, from_wallet, to_wallet, balance, transfer_at) VALUES ($1, $2, $3, $4, DEFAULT);
-
--- name: GetUserWallet :one
-SELECT a.wallet_id FROM accounts a
-RIGHT JOIN auth_info ai ON ai.id = a.auth_info
-WHERE ai.registered_number = $1;
-
--- name: GetUserWalletAndAuth :one
-SELECT a.wallet_id, ai.pin FROM accounts a
-RIGHT JOIN auth_info ai ON ai.id = a.auth_info
+-- name: AuthGetCustomerAccount :one
+SELECT cutomer_id, auth_info_id, wallet_id, account_type_id 
+FROM accounts a 
+LEFT JOIN auth_info ai 
+ON ai.id = a.auth_info_id 
 WHERE ai.registered_number = $1;

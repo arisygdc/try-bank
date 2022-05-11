@@ -7,18 +7,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type PublicInfo_comp struct {
+type PublicInfo_company struct {
 	Name, Email, Phone string
 }
 
+// PublicInfo_company contains string of Name, Email, Phone
 type RegisterCompanyParam struct {
-	PublicInfo_comp
+	PublicInfo_company
 	Pin     string
 	Deposit float64
 }
 
 type RegisteredCompanyDetail struct {
-	PublicInfo_comp
+	PublicInfo_company
 	Deposit        float64
 	RegisterNumber int32
 }
@@ -92,6 +93,7 @@ func (svc Service) CreateCompanyAccount(ctx context.Context, param RegisterCompa
 	return registered, err
 }
 
+// Company account is confident information about all uuid table relation
 func (svc Service) CompanyAccount(ctx context.Context, regNum_comp int32) (CompaniesAccount, error) {
 	ca, err := svc.repos.Query().AuthGetCompaniesAccount(ctx, regNum_comp)
 	return CompaniesAccount(ca), err

@@ -17,11 +17,3 @@ type PostCompany struct {
 	TopUp float64 `from:"top_up" json:"top_up" binding:"required"`
 	Pin   string  `from:"pin" json:"pin" binding:"required"`
 }
-
-// new request
-
-type RegisterVirtualAccount struct {
-	AuthorizationKEY string `json:"auth_key" binding:"required"`
-	Identity         int32  `json:"identity" binding:"required"`
-	CallbackURL      string `json:"callback_url" binding:"required"`
-}

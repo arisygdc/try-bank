@@ -20,3 +20,10 @@ FROM companies_account ca
 LEFT JOIN auth_info ai 
 ON ai.id = ca.auth_info_id 
 WHERE ai.registered_number = $1;
+
+-- name: VAGetCompaniesAccount :one
+SELECT company_id, auth_info_id, wallet_id, virtual_account_id
+FROM companies_account ca 
+LEFT JOIN virtual_account va 
+ON va.id = ca.virtual_account_id 
+WHERE va.identity = $1;
