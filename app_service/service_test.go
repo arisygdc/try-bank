@@ -2,7 +2,6 @@ package appservice
 
 import (
 	"context"
-	"math/big"
 	"testing"
 	"time"
 	"try-bank/app_service/account"
@@ -163,15 +162,22 @@ func TestVirtualAccountPayment(t *testing.T) {
 	}
 
 	company = ca[0]
-	vaNumb := int32(util.RandNum(big.NewInt(999999)))
+	vaNumb := int32(288029)
 
 	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
 		Virtual_account_id:     company.VirtualAccountID.UUID,
 		Virtual_account_number: vaNumb,
 		Payment_charge:         40000,
 	})
-
 	assert.Nil(t, err)
+
+	err = svc.IssueVAPayment(ctx, virtualaccount.IssueVAPayment{
+		Virtual_account_id:     company.VirtualAccountID.UUID,
+		Virtual_account_number: vaNumb,
+		Payment_charge:         40000,
+	})
+	assert.Error(t, err)
+
 	issued, err := svc.IssuedVAPaymentValidation(ctx, virtualaccount.IssueVAPayment{
 		Virtual_account_id:     company.VirtualAccountID.UUID,
 		Virtual_account_number: vaNumb,
