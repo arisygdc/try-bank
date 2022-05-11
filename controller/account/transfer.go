@@ -16,7 +16,7 @@ type PostTransfer struct {
 func (ctr AccountController) Transfer(ctx *gin.Context) {
 	var req PostTransfer
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
@@ -36,7 +36,7 @@ func (ctr AccountController) Transfer(ctx *gin.Context) {
 	transferTo, err := ctr.service.Account.CustomerAccount(ctx, req.To)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusBadRequest, gin.H{})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "registration number not found"})
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{})
@@ -46,7 +46,7 @@ func (ctr AccountController) Transfer(ctx *gin.Context) {
 	transferFrom, err := ctr.service.Account.CustomerAccount(ctx, payload.Registered_number)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusBadRequest, gin.H{})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "illegal access"})
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{})
@@ -54,12 +54,7 @@ func (ctr AccountController) Transfer(ctx *gin.Context) {
 	}
 
 	err = ctr.service.Account.Transfer(ctx, transferFrom.WalletID, transferTo.WalletID, req.Balance)
-	// response
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusBadRequest, gin.H{})
-			return
-		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
