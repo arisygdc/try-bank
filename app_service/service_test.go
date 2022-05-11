@@ -172,7 +172,7 @@ func TestVirtualAccountPayment(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	issued, err := svc.CheckIssuedVAPayment(ctx, virtualaccount.IssueVAPayment{
+	issued, err := svc.IssuedVAPaymentValidation(ctx, virtualaccount.IssueVAPayment{
 		Virtual_account_id:     company.VirtualAccountID.UUID,
 		Virtual_account_number: vaNumb,
 		Payment_charge:         40000,

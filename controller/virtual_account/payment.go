@@ -47,7 +47,7 @@ func (ctr VirtualAccountController) VirtualAccount_pay(ctx *gin.Context) {
 		Payment_charge:         700000,
 	}
 
-	issuedPayment, err := ctr.service.VirtualAccount.CheckIssuedVAPayment(ctx, issuedPaymentParam)
+	issuedPayment, err := ctr.service.VirtualAccount.IssuedVAPaymentValidation(ctx, issuedPaymentParam)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return

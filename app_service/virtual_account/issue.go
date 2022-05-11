@@ -30,7 +30,7 @@ func (svc Service) IssueVAPayment(ctx context.Context, param IssueVAPayment) err
 	})
 }
 
-func (svc Service) CheckIssuedVAPayment(ctx context.Context, param IssueVAPayment) (IssuedPayment, error) {
+func (svc Service) IssuedVAPaymentValidation(ctx context.Context, param IssueVAPayment) (IssuedPayment, error) {
 	issuedPaymentParam := postgresql.CheckIssuedPaymentVAParams{
 		VirtualAccountID:     param.Virtual_account_id,
 		VirtualAccountNumber: param.Virtual_account_number,
