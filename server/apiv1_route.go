@@ -7,8 +7,8 @@ func (s *Server) ApiV1Route() {
 
 	// customer route
 	// TODO
-	// transfer
 	r.POST("/customer", s.controller.Account.Register)
+	r.POST("/transfer", s.controller.Account.Transfer)
 
 	// company route
 	r.POST("/company", s.controller.Company.RegisterCompany)
