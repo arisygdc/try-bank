@@ -3,6 +3,7 @@ package account
 import (
 	"database/sql"
 	"net/http"
+	"try-bank/server/middleware"
 	"try-bank/token"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +21,7 @@ func (ctr AccountController) Transfer(ctx *gin.Context) {
 		return
 	}
 
-	// middleware not yet created
-	getPayload, exists := ctx.Get("userPayload")
+	getPayload, exists := ctx.Get(middleware.PayloadKey)
 	if !exists {
 		ctx.JSON(http.StatusForbidden, gin.H{})
 		return

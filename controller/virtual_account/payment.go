@@ -3,41 +3,52 @@ package virtualaccount
 import (
 	"net/http"
 	virtualaccount "try-bank/app_service/virtual_account"
+	"try-bank/server/middleware"
+	"try-bank/token"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Payer is customer (registered_number) wants to pay vitrual account
 type PostVirtualAccountPay struct {
-	Payer          int32  `json:"registered_number" binding:"required"`
 	VirtualAccount string `json:"virtual_account" binding:"required"`
 }
 
 // TODO
-// payer should be in authentication barier
 // http status code
 func (ctr VirtualAccountController) VirtualAccount_pay(ctx *gin.Context) {
 	var req PostVirtualAccountPay
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
+		return
+	}
+
+	getPayload, exists := ctx.Get(middleware.PayloadKey)
+	if !exists {
+		ctx.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+
+	payload, ok := getPayload.(*token.Payload)
+	if !ok {
+		ctx.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
 	va_identity, va_number, err := ctr.service.VirtualAccount.ValidateVirtualAccount(req.VirtualAccount)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
-	payerAccount, err := ctr.service.Account.CustomerAccount(ctx, req.Payer)
+	payerAccount, err := ctr.service.Account.CustomerAccount(ctx, payload.Registered_number)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
 	ca, err := ctr.service.VirtualAccount.VirtualAccountGetCompany(ctx, int32(va_identity))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
@@ -49,7 +60,7 @@ func (ctr VirtualAccountController) VirtualAccount_pay(ctx *gin.Context) {
 
 	issuedPayment, err := ctr.service.VirtualAccount.IssuedVAPaymentValidation(ctx, issuedPaymentParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
@@ -59,7 +70,7 @@ func (ctr VirtualAccountController) VirtualAccount_pay(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
