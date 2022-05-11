@@ -12,11 +12,14 @@ type JWToken struct {
 
 const minSecretKey = 32
 
-var signingMethod = jwt.SigningMethodHS256
+var (
+	signingMethod    = jwt.SigningMethodHS256
+	ErrSecretKeyLeng = fmt.Errorf("invalid secret key length: must be at least %d", minSecretKey)
+)
 
 func NewJWT(secretKey string) (*JWToken, error) {
 	if len(secretKey) < minSecretKey {
-		return nil, fmt.Errorf("invalid secret key length: must be at least %d", minSecretKey)
+		return nil, ErrSecretKeyLeng
 	}
 
 	return &JWToken{
